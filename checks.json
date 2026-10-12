@@ -1,0 +1,202 @@
+[
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Drag coefficient, Re = 0.1",
+  "expected": "244.1",
+  "normal": "244.7",
+  "fine": "244.5",
+  "source": "Proudman and Pearson (1957) expansion"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Drag coefficient, Re = 50",
+  "expected": "1.57",
+  "normal": "1.567",
+  "fine": "1.571",
+  "source": "Johnson and Patel (1999)"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Wake length / diameter, Re = 50",
+  "expected": "0.40",
+  "normal": "0.42",
+  "fine": "0.41",
+  "source": "Johnson and Patel (1999)"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Separation angle from the rear, Re = 50",
+  "expected": "40.7°",
+  "normal": "40.8°",
+  "fine": "40.8°",
+  "source": "Clift, Grace and Weber (1978)"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Drag coefficient, Re = 100",
+  "expected": "1.08",
+  "normal": "1.068",
+  "fine": "1.077",
+  "source": "Johnson and Patel (1999)"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Wake length / diameter, Re = 100",
+  "expected": "0.88",
+  "normal": "0.87",
+  "fine": "0.88",
+  "source": "Johnson and Patel (1999)"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Separation angle from the rear, Re = 100",
+  "expected": "53.5°",
+  "normal": "53.2°",
+  "fine": "53.2°",
+  "source": "Clift, Grace and Weber (1978); Johnson and Patel (1999): 53°"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Drag coefficient, Re = 150",
+  "expected": "0.90",
+  "normal": "0.860",
+  "fine": "0.871",
+  "source": "Johnson and Patel (1999)"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Wake length / diameter, Re = 150",
+  "expected": "1.20",
+  "normal": "1.22",
+  "fine": "1.21",
+  "source": "Johnson and Patel (1999)"
+ },
+ {
+  "group": "Flow past a sphere with an immobile surface",
+  "label": "Separation angle from the rear, Re = 150",
+  "expected": "59.6°",
+  "normal": "59.5°",
+  "fine": "59.5°",
+  "source": "Clift, Grace and Weber (1978)"
+ },
+ {
+  "group": "Flow past a spherical bubble with a clean (mobile) surface",
+  "label": "Drag coefficient, Re = 0.1",
+  "expected": "161.9",
+  "normal": "162.1",
+  "fine": "162.1",
+  "source": "Mei, Klausner and Lawrence (1994); Hadamard-Rybczynski limit 16/Re = 160"
+ },
+ {
+  "group": "Flow past a spherical bubble with a clean (mobile) surface",
+  "label": "Drag coefficient, Re = 10",
+  "expected": "2.477",
+  "normal": "2.442",
+  "fine": "2.441",
+  "source": "Mei, Klausner and Lawrence (1994)"
+ },
+ {
+  "group": "Flow past a spherical bubble with a clean (mobile) surface",
+  "label": "Drag coefficient, Re = 50",
+  "expected": "0.678",
+  "normal": "0.675",
+  "fine": "0.674",
+  "source": "Mei, Klausner and Lawrence (1994)"
+ },
+ {
+  "group": "Flow past a spherical bubble with a clean (mobile) surface",
+  "label": "Drag coefficient, Re = 100",
+  "expected": "0.375",
+  "normal": "0.377",
+  "fine": "0.376",
+  "source": "Mei, Klausner and Lawrence (1994)"
+ },
+ {
+  "group": "Collision efficiency, exact limits",
+  "label": "Stokes flow, interception, d<sub>p</sub>/d<sub>b</sub> = 0.05",
+  "expected": "3.6905 × 10<sup>−3</sup>",
+  "normal": "3.6905 × 10<sup>−3</sup>",
+  "fine": "",
+  "source": "Exact for Stokes flow; Gaudin (1957) for small particles"
+ },
+ {
+  "group": "Collision efficiency, exact limits",
+  "label": "Potential flow, interception, d<sub>p</sub>/d<sub>b</sub> = 0.05",
+  "expected": "0.15012",
+  "normal": "0.15012",
+  "fine": "",
+  "source": "Exact for potential flow; Sutherland (1948) for small particles"
+ },
+ {
+  "group": "Collision efficiency, exact limits",
+  "label": "Stokes flow, settling only (point particle, settling speed 0.1 U)",
+  "expected": "0.09091",
+  "normal": "0.09091",
+  "fine": "",
+  "source": "Exact: w<sub>s</sub> / (U + w<sub>s</sub>)"
+ },
+ {
+  "group": "Collision efficiency, immobile surface, interception only",
+  "label": "E / (d<sub>p</sub>/d<sub>b</sub>)² for small particles, Re = 1",
+  "expected": "1.73 (Yoon and Luttrell: 1.77)",
+  "normal": "1.72",
+  "fine": "1.72",
+  "source": "Weber and Paddock (1983)"
+ },
+ {
+  "group": "Collision efficiency, immobile surface, interception only",
+  "label": "E / (d<sub>p</sub>/d<sub>b</sub>)² for small particles, Re = 10",
+  "expected": "2.98 (Yoon and Luttrell: 2.90)",
+  "normal": "2.93",
+  "fine": "2.93",
+  "source": "Weber and Paddock (1983)"
+ },
+ {
+  "group": "Collision efficiency, immobile surface, interception only",
+  "label": "E / (d<sub>p</sub>/d<sub>b</sub>)² for small particles, Re = 50",
+  "expected": "5.86 (Yoon and Luttrell: 5.96)",
+  "normal": "5.72",
+  "fine": "5.71",
+  "source": "Weber and Paddock (1983)"
+ },
+ {
+  "group": "Collision efficiency, immobile surface, interception only",
+  "label": "E / (d<sub>p</sub>/d<sub>b</sub>)² for small particles, Re = 100",
+  "expected": "8.07 (Yoon and Luttrell: 8.84)",
+  "normal": "7.91",
+  "fine": "7.90",
+  "source": "Weber and Paddock (1983)"
+ },
+ {
+  "group": "Particle trajectories",
+  "label": "Without inertia (Stokes number 10<sup>−7</sup>), immobile surface, Re = 100, d<sub>p</sub>/d<sub>b</sub> = 0.03, w<sub>s</sub>/U = 0.02: E from integrated paths",
+  "expected": "0.02604 (fine grid: 0.02602)",
+  "normal": "0.02602",
+  "fine": "0.02601",
+  "source": "Exact for the same flow, from the particle stream function; difference −0.07 %"
+ },
+ {
+  "group": "Particle trajectories",
+  "label": "Without inertia (Stokes number 10<sup>−7</sup>), mobile surface, Re = 100, d<sub>p</sub>/d<sub>b</sub> = 0.03, w<sub>s</sub>/U = 0.02: E from integrated paths",
+  "expected": "0.09168 (fine grid: 0.09163)",
+  "normal": "0.09164",
+  "fine": "0.09159",
+  "source": "Exact for the same flow, from the particle stream function; difference −0.05 %"
+ },
+ {
+  "group": "Particle trajectories",
+  "label": "With inertia: 30 µm quartz, 1.0 mm bubble with frother (Re = 111.8, Stokes number 0.035), exponential integrator against Runge-Kutta",
+  "expected": "0.01346",
+  "normal": "0.01346",
+  "fine": "",
+  "source": "Same flow; difference −0.02 %"
+ },
+ {
+  "group": "Synthetic PIV",
+  "label": "Uniform shift of 2.3 and −1.7 pixels, 32 px windows: random error of one displacement component",
+  "expected": "about 0.05 px or less",
+  "normal": "0.037 px",
+  "fine": "",
+  "source": "Typical for 32 px windows: Raffel et al. (2018)"
+ }
+]
