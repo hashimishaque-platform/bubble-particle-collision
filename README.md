@@ -1,8 +1,9 @@
 # Bubble and particle collision
 
-The flow around a rising bubble, the particles that hit it, and synthetic PIV of the same flow.
-It is a single-page browser program: everything is computed in the browser, with no server and
-no libraries.
+The flow around a rising bubble, the particles that hit it, and synthetic PIV of the same flow,
+for flotation. The program solves the Navier-Stokes equations around the bubble, follows particles
+with the Maxey-Riley equation and computes the collision efficiency. It is a single-page browser
+program: everything is computed in the browser, with no server and no libraries.
 
 **Open the program:** https://hashimishaque.com/bubble-particle-collision/
 
@@ -87,7 +88,8 @@ about three minutes.
 | `piv.js` | Synthetic PIV images and their evaluation |
 | `template.html` | The page around the code: text, figures and form |
 | `checks.js`, `checks.json` | The checks and their results |
-| `build.py` | Puts the page together: `python3 build.py` |
+| `build.py` | Puts the page together, with its title, description and preview tags: `python3 build.py` |
+| `screenshot.png`, `social.png` | Screenshot for this README, and the preview image shown when the page is shared |
 
 `flow.js` and `piv.js` are plain JavaScript without dependencies and also run in Node.js 18 or
 newer.
