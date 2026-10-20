@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this program, please cite it as below."
+title: "Bubble and particle collision: flow around a rising bubble, collision efficiency, synthetic PIV and turbulence around bubbles"
+type: software
+authors:
+  - family-names: Ishaque
+    given-names: Hashim
+version: 1.0.0
+date-released: 2026-10-20
+license: MIT
+repository-code: "https://github.com/hashimishaque-platform/bubble-particle-collision"
+url: "https://hashimishaque.com/bubble-particle-collision/"
+keywords:
+  - flotation
+  - bubble-particle collision
+  - collision efficiency
+  - Navier-Stokes
+  - lattice Boltzmann
+  - Maxey-Riley
+  - particle image velocimetry
+  - turbulence
+abstract: >-
+  A browser program, with a command-line interface, for the flow around a rising bubble and
+  the collision of particles with it, as in flotation. It solves the axisymmetric Navier-Stokes
+  equations around the bubble, follows particles with the Maxey-Riley equation, computes the
+  collision efficiency, makes and evaluates synthetic PIV recordings, draws bubble swarms with
+  synthetic turbulence, and runs a live two-dimensional lattice Boltzmann simulation of a bubble
+  in a turbulent stream. Every part is checked against exact solutions or published values.
