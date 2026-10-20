@@ -146,6 +146,18 @@ for (const surf of ['rigid', 'free']) {
   add(G, 'Rise speed of a 0.1 mm bubble, fully contaminated (Tomiyama et al. 1998) divided by Schiller and Naumann (1933)', '1', fx(u1 / u2, 6), '', 'Tomiyama et al. reduce to Schiller and Naumann at low Re and Eo');
   const d2 = 10e-3, Eo = S.eotvos(d2), cd = 8 / 3 * Eo / (Eo + 4), u3 = Math.sqrt(4 * (S.SW.rhoL - S.SW.rhoG) * S.SW.g * d2 / (3 * cd * S.SW.rhoL));
   add(G, 'Rise speed of a 10 mm bubble (m/s), slightly contaminated', `${fx(u3, 4)} (C<sub>D</sub> = 8 Eo / (3 (Eo + 4)), Eo = ${fx(Eo, 2)})`, fx(S.riseVelocity(d2, 'slight'), 4), '', 'Shape branch of Tomiyama et al. (1998), closed form');
+  // lower surface tension: a 2.3 mm bubble at 29.7 mN/m, fully contaminated, lies on the shape branch
+  const sg = 0.0297, d3 = 2.3e-3, Eo3 = S.eotvos(d3, sg), cd3 = 8 / 3 * Eo3 / (Eo3 + 4), u4 = Math.sqrt(4 * (S.SW.rhoL - S.SW.rhoG) * S.SW.g * d3 / (3 * cd3 * S.SW.rhoL));
+  const u5 = S.riseVelocity(d3, 'full', S.SW.mu, sg);
+  add(G, 'Rise speed of a 2.3 mm bubble at a surface tension of 29.7 mN/m, fully contaminated (m/s)', `${fx(u4, 4)} (shape branch, Eo = ${fx(Eo3, 2)})`, fx(u5, 4), '', 'Tomiyama et al. (1998), closed form');
+  // tracks file reader and the time-step estimate, on a chain made and moved by the program
+  const ch = S.makeSwarm({ n: 4, d: 2.5e-3, sys: 'full', chain: true, spacing: 10, box: [30, 40, 10] });
+  let csv = 'LfdNr,TimeStep,ID,X,Y,Z,VX,VY,VZ,a,c,alpha\n', row = 0;
+  for (let k = 1; k <= 60; k++) for (const q of S.advanceSwarm(ch.bubbles, (k - 1) * 0.5e-3, 1e6)) csv += [++row, k, q.id, q.x, q.y, q.z, q.vx, q.vy, q.vz, q.a, q.c, q.alpha].join(',') + '\n';
+  const tr = S.tracksById(S.parseTracks(csv)), dtEst = S.trackTimeStep(tr), st = S.trackStats(tr.get(1));
+  add(G, 'Tracks made by the program, 0.5 ms per time step: time step estimated from distance moved and velocity (ms)', '0.5', fx(dtEst * 1e3, 6), '', 'Exact for bubbles moving at constant speed');
+  add(G, 'Same tracks: mean rise speed and diameter of one track', `${fx(ch.U, 4)} m/s, 2.500 mm`, `${fx(st.U, 4)} m/s, ${fx(st.d * 1e3, 3)} mm`, '', 'Values used to make the tracks');
+  if (Math.abs(u5 / u4 - 1) > 1e-6 || Math.abs(dtEst / 0.5e-3 - 1) > 1e-7 || Math.abs(st.U / ch.U - 1) > 1e-9) { console.error('swarm track checks failed'); process.exitCode = 1; }
   if (eBC > 1e-6 || eDiv / gMax > 1e-4 || Math.abs(e / N / T.energy - 1) > 0.03 || dMax / gM > 1e-4 || Math.abs(u1 / u2 - 1) > 1e-6) { console.error('swarm checks failed'); process.exitCode = 1; }
 }
 
