@@ -254,5 +254,29 @@
   "normal": "0.2521",
   "fine": "",
   "source": "Shape branch of Tomiyama et al. (1998), closed form"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Rise speed of a 2.3 mm bubble at a surface tension of 29.7 mN/m, fully contaminated (m/s)",
+  "expected": "0.1927 (shape branch, Eo = 1.74)",
+  "normal": "0.1927",
+  "fine": "",
+  "source": "Tomiyama et al. (1998), closed form"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Tracks made by the program, 0.5 ms per time step: time step estimated from distance moved and velocity (ms)",
+  "expected": "0.5",
+  "normal": "0.500000",
+  "fine": "",
+  "source": "Exact for bubbles moving at constant speed"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Same tracks: mean rise speed and diameter of one track",
+  "expected": "0.2510 m/s, 2.500 mm",
+  "normal": "0.2510 m/s, 2.500 mm",
+  "fine": "",
+  "source": "Values used to make the tracks"
  }
 ]

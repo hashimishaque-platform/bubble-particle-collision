@@ -170,6 +170,8 @@ not uploaded or stored anywhere.
   <div class="fig">
     <svg id="fig5" class="plot" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bubbles in a turbulent liquid and the velocity of the liquid around them"></svg>
     <p class="caption" id="cap5"></p>
+    <svg id="fig6" class="plot" viewBox="0 0 600 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rise speed against bubble size, and aspect ratio against Eotvos number"></svg>
+    <p class="caption" id="cap6"></p>
   </div>
   <div class="side">
     <form id="swform" novalidate>
@@ -177,11 +179,14 @@ not uploaded or stored anywhere.
         <legend>Bubbles</legend>
         <table class="form">
           <tr><td><label for="swsrc">Source</label></td><td><select id="swsrc"><option value="model">swarm made by the program</option><option value="file">tracks file</option></select></td></tr>
+          <tr class="swmodel"><td><label for="swarr">Arrangement</label></td><td><select id="swarr"><option value="random">random swarm</option><option value="chain">chain above one needle</option></select></td></tr>
           <tr class="swmodel"><td><label for="swn">Number</label></td><td><input type="number" id="swn" step="1" min="1" max="80" value="25"></td></tr>
           <tr class="swmodel"><td><label for="swd">Diameter</label></td><td><input type="number" id="swd" step="0.1" min="0.3" max="6" value="2.5"> mm</td></tr>
+          <tr class="swmodel swchain"><td><label for="swsp">Spacing in the chain</label></td><td><input type="number" id="swsp" step="0.5" min="2" max="40" value="10"> mm</td></tr>
           <tr class="swmodel"><td><label for="swsys">Water</label></td><td><select id="swsys"><option value="full">with frother (fully contaminated)</option><option value="slight">slightly contaminated</option><option value="pure">pure</option></select></td></tr>
           <tr class="swfile"><td><label for="swfile">File</label></td><td><input type="file" id="swfile" accept=".csv,.txt,text/csv" style="max-width:12em"></td></tr>
           <tr class="swfile"><td><label for="swstep">Time step</label></td><td><input type="range" id="swstep" min="0" max="0" value="0" style="max-width:9em"> <span id="swsteplab"></span></td></tr>
+          <tr><td><label for="swsig">Surface tension</label></td><td><input type="number" id="swsig" step="0.5" min="20" max="80" value="72.75"> mN/m</td></tr>
           <tr><td><label for="swz">Cut at z</label></td><td><input type="number" id="swz" step="0.5" value="0"> mm</td></tr>
         </table>
         <p class="small swfile" style="margin:6px 0 0">Columns TimeStep, ID, X, Y, Z, VX, VY, VZ, a, c, alpha: positions and semi-axes in mm, y upwards, velocities in m/s, the tilt alpha in degrees.</p>
@@ -193,6 +198,12 @@ not uploaded or stored anywhere.
           <tr><td><label for="swL">Largest eddies L</label></td><td><input type="number" id="swL" step="1" min="2" max="500" value="20"> mm</td></tr>
           <tr><td><label for="swshow">Show</label></td><td><select id="swshow"><option value="both">bubbles and turbulence</option><option value="bub">bubbles only</option><option value="turb">turbulence only</option></select></td></tr>
         </table>
+      </fieldset>
+      <fieldset>
+        <legend>Time</legend>
+        <p style="margin:0"><input type="button" id="swplay" value="Play"> <input type="button" id="swback" value="Restart">
+          <label for="swspeed">Speed</label> <select id="swspeed"><option value="0.01">100 times slower</option><option value="0.033" selected>30 times slower</option><option value="0.1">10 times slower</option></select></p>
+        <p class="small" id="swtime" style="margin:6px 0 0"></p>
       </fieldset>
       <p><input type="submit" value="Draw"> <input type="button" id="swnew" value="New swarm"></p>
     </form>
@@ -242,7 +253,18 @@ turbulence adds eddies of all sizes from L down to the smallest the figure can s
 the turbulent velocities are of the same order as the rise speed, so in the bulk of a cell the
 turbulence, not the bubble, often sets the local flow. A bubble drawn solid is cut by the plane;
 a dashed one lies in front of or behind it, but its flow is still included. Choose "bubbles
-only" or "turbulence only" to see the two parts apart.
+only" or "turbulence only" to see the two parts apart. Press Play to let the bubbles rise, or,
+for a tracks file, to step through its time steps; the speed is slowed down so the motion can be
+followed. The chain arrangement puts the bubbles in one line, as above a single needle in a bubble
+column.
+</p>
+<p>
+Figure 6 compares the bubbles with the correlations the swarm is built from. For a tracks file
+each track is one circle, at its mean size, rise speed and aspect ratio. Clean bubbles rise
+faster and are flatter than contaminated ones of the same size, so a file whose points lie above
+the curves in (a) and below the curve in (b) behaves like bubbles in clean water. Set the surface
+tension to that of the liquid in the file; a surfactant lowers it and so lowers the rise speed
+of bubbles above about 2 mm.
 </p>
 
 <h2>Model</h2>
@@ -328,7 +350,9 @@ C      = (55/18) C_1 = 1.62                         C_1 = 0.53 (Sreenivasan 1995
 η      = (ν³/ε)^(1/4)                               Kolmogorov length</pre>
 <p>
 The wavenumbers are spaced geometrically up to the smaller of 1/η and the finest scale the
-grid of Figure 5 can show. The field is frozen in time. For a sense of scale: the mean power
+grid of Figure 5 can show. The field is frozen in time; when the figure plays, only the bubbles
+move. For a tracks file the time between time steps is not in the file, so it is estimated as the
+median, over all tracks, of the distance a bubble moves in one step divided by its velocity. For a sense of scale: the mean power
 dissipation in industrial mechanical flotation cells is typically 0.6 to 3 kW/m³, that is about
 0.6 to 3 W/kg (Massey 2011, citing Deglon et al. 2000 and Lelinski et al. 2011). It is much lower
 in the bulk of the cell, and near the impeller it is 5 to 200 times higher than elsewhere
@@ -976,7 +1000,7 @@ function writePivResults(c, opt) {
 }
 
 // ---------- Figure 5: bubble swarm in turbulent liquid ----------
-const swState = { seed: 1, tracks: null, fileName: '', swarm: null };
+const swState = { seed: 1, tracks: null, fileName: '', swarm: null, t: 0, playing: false, last: 0, acc: 0 };
 function swDomain(bubbles, all) {
   // extents of the bubbles (all time steps for a file) plus a margin, widened to the 3:4 shape of the figure
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -990,6 +1014,7 @@ function swDomain(bubbles, all) {
 function swInputs() {
   return {
     src: $('swsrc').value, n: Math.round(clamp(num('swn', 25), 1, 80)), d: clamp(num('swd', 2.5), 0.3, 6) * 1e-3, sys: $('swsys').value,
+    arr: $('swarr').value, sp: clamp(num('swsp', 10), 2, 40), sigma: clamp(num('swsig', 72.75), 20, 80) * 1e-3,
     z: num('swz', 0), eps: clamp(num('sweps', 1), 0, 100), L: clamp(num('swL', 20), 2, 500) * 1e-3, show: $('swshow').value,
   };
 }
@@ -997,8 +1022,9 @@ function swShowRows() {
   const file = $('swsrc').value === 'file';
   document.querySelectorAll('.swmodel').forEach((e) => { e.style.display = file ? 'none' : ''; });
   document.querySelectorAll('.swfile').forEach((e) => { e.style.display = file ? '' : 'none'; });
+  if (!file) document.querySelectorAll('.swchain').forEach((e) => { e.style.display = $('swarr').value === 'chain' ? '' : 'none'; });
 }
-function drawSwarm() {
+function drawSwarm(still) {
   const u = swInputs();
   swShowRows();
   let bubbles, all, info = null, stepLabel = '';
@@ -1009,15 +1035,17 @@ function drawSwarm() {
     all = T.all;
     stepLabel = `${T.keys[i]}`;
     $('swsteplab').textContent = `${T.keys[i]} (${i + 1} of ${T.keys.length})`;
+    $('swtime').textContent = `t = ${fmt((T.keys[i] - T.keys[0]) * T.dt * 1e3, 4)} ms after the first time step, with ${fmt(T.dt * 1e3, 3)} ms per time step estimated from the tracks (distance moved divided by velocity), that is ${fmt(1 / T.dt, 3)} frames per second.`;
   } else {
-    const key = [u.n, u.d, u.sys, swState.seed].join('|');
+    const key = [u.n, u.d, u.sys, u.arr, u.sp, u.sigma, swState.seed].join('|');
     if (!swState.swarm || swState.swarm.key !== key) {
-      swState.swarm = makeSwarm({ n: u.n, d: u.d, sys: u.sys, box: [30, 40, 10], seed: swState.seed });
+      swState.swarm = makeSwarm({ n: u.n, d: u.d, sys: u.sys, sigma: u.sigma, chain: u.arr === 'chain', spacing: u.sp, box: [30, 40, 10], seed: swState.seed });
       swState.swarm.key = key;
     }
     info = swState.swarm;
-    bubbles = info.bubbles;
-    all = bubbles;
+    all = info.bubbles.concat(info.bubbles.map((b) => Object.assign({}, b, { y: -20 })), info.bubbles.map((b) => Object.assign({}, b, { y: 20 })));
+    bubbles = advanceSwarm(info.bubbles, swState.t, 40);
+    $('swtime').textContent = `t = ${fmt(swState.t * 1e3, 4)} ms. The bubbles rise with their terminal speed; one that leaves the box at the top comes back at the bottom. The turbulence is frozen.`;
   }
   const D = swDomain(bubbles, all);
   const svg = $('fig5');
@@ -1107,7 +1135,7 @@ function drawSwarm() {
   txt(svg, bx + 204, by + 9, `${fmt(vMax, 2)} m/s`, { 'font-size': 12 });
   // caption, results and notes
   const showTxt = u.show === 'bub' ? 'from the bubbles only' : u.show === 'turb' ? 'from the turbulence only' : 'from the bubbles and the turbulence';
-  const src = u.src === 'file' ? `${bubbles.length} bubbles from the tracks file ${swState.fileName.replace(/[<>&]/g, '')}, time step ${stepLabel}; grey: their tracks so far` : `${bubbles.length} bubbles of ${fmt(u.d * 1e3, 3)} mm made by the program, rising at ${fmt(info.U, 3)} m/s`;
+  const src = u.src === 'file' ? `${bubbles.length} bubbles from the tracks file ${swState.fileName.replace(/[<>&]/g, '')}, time step ${stepLabel}; grey: their tracks so far` : `${bubbles.length} bubbles of ${fmt(u.d * 1e3, 3)} mm made by the program${u.arr === 'chain' ? `, in a chain ${fmt(Math.max(u.sp, 2.1 * info.c), 3)} mm apart` : ''}, rising at ${fmt(info.U, 3)} m/s, t = ${fmt(swState.t * 1e3, 4)} ms`;
   $('cap5').innerHTML = `<b>Figure 5.</b> Cut through a bubble swarm at z = ${fmt(u.z, 3)} mm: ${src}. Colour: speed of the liquid in the plane of the cut, ${showTxt}; arrows: its direction, longer where it is faster. Bubbles cut by the plane are solid, the others dashed; red: the velocity of each bubble.${T ? ` Turbulence: ε = ${fmt(u.eps, 3)} W/kg, L = ${fmt(u.L * 1e3, 3)} mm.` : ''}`;
   const rows = [];
   if (info) {
@@ -1116,19 +1144,103 @@ function drawSwarm() {
   } else {
     const n = bubbles.length, mv = bubbles.reduce((s, b) => s + b.vy, 0) / n, md = bubbles.reduce((s, b) => s + 2 * eqRadiusMm(b), 0) / n;
     rows.push(['Bubbles in this time step', String(n)], ['Mean upward velocity', `${fmt(mv, 3)} m/s`], ['Mean volume-equivalent diameter', `${fmt(md, 3)} mm`],
-      ['Rise speed of that size (Tomiyama, fully contaminated)', `${fmt(riseVelocity(md * 1e-3, 'full'), 3)} m/s`], ['Bubbles cut by the plane', String(nCut)]);
+      ['Rise speed of that size (Tomiyama, fully contaminated, this surface tension)', `${fmt(riseVelocity(md * 1e-3, 'full', SW.mu, u.sigma), 3)} m/s`], ['Bubbles cut by the plane', String(nCut)]);
   }
   if (T) {
     rows.push(['Kolmogorov length η', `${fmt(T.eta * 1e6, 3)} µm`], ['Smallest eddy drawn, 2π / k<sub>max</sub>', `${fmt(2 * Math.PI / T.kN * 1e3, 3)} mm`],
       ['Turbulent velocity u′ of the modes drawn', `${fmt(T.uRms, 3)} m/s`], ['Share of the turbulent energy below L that is drawn', `${fmt(100 * T.energy / T.total, 3)} %`]);
   }
-  $('swres').innerHTML = rows.map((q) => `<tr><td>${q[0]}</td><td class="l">${q[1]}</td></tr>`).join('');
+  $('swres').innerHTML = rows.map((q) => `<tr><td>${q[0]}</td><td class="l">${q[1]}</td></tr>`).join('') + (still && u.src === 'file' ? swState.statsHtml || '' : '');
   const notes = [];
   if (u.src === 'file') notes.push('Tracks file: read in your browser only, not uploaded or stored. Positions and semi-axes are taken as mm and velocities as m/s; a is the horizontal and c the vertical semi-axis, and alpha turns the a axis from the x axis towards y.');
   if (u.src === 'model' && bubbles.length < u.n) notes.push(`Only ${bubbles.length} bubbles fit into the box without touching.`);
   if (T && T.eta * 2 * Math.PI < 2 * Math.PI / T.kN) notes.push('Eddies smaller than the grid of the figure are left out. Their share of the energy is small, but they carry most of the velocity gradients.');
   $('swnotes').innerHTML = notes.map((q) => `<p>${q}</p>`).join('');
-  $('swstatus').textContent = '';
+  if (!still) { $('swstatus').textContent = ''; drawSwarmStats(u, info); }
+}
+
+// ---------- Figure 6: rise speed and shape against the correlations ----------
+function drawSwarmStats(u, info) {
+  const svg = $('fig6');
+  clear(svg);
+  const P = [{ X0: 52, X1: 290, xl: 'volume-equivalent diameter d (mm)', yl: 'rise speed (m/s)' }, { X0: 352, X1: 590, xl: 'Eötvös number Eo', yl: 'aspect ratio c/a' }];
+  const Y0 = 12, Y1 = 280;
+  const file = u.src === 'file' && swState.tracks;
+  const pts = file ? swState.tracks.stats.filter((q) => q.n >= 10) : [];
+  const dMax = Math.max(6, ...pts.map((q) => 1.1 * q.d * 1e3));
+  const EoMax = Math.max(4, ...pts.map((q) => 1.1 * eotvos(q.d, u.sigma)));
+  const ax = [[0, dMax, 0, 0.45], [0, EoMax, 0, 1]];
+  const map = (k, x, y) => [P[k].X0 + (P[k].X1 - P[k].X0) * (x - ax[k][0]) / (ax[k][1] - ax[k][0]), Y1 - (Y1 - Y0) * (y - ax[k][2]) / (ax[k][3] - ax[k][2])];
+  const tk = (lo, hi, n) => { const st = [0.05, 0.1, 0.2, 0.5, 1, 2, 5].find((q) => (hi - lo) / q <= n) || 10, out = []; for (let v = Math.ceil(lo / st) * st; v <= hi + 1e-9; v += st) out.push(+v.toFixed(3)); return out; };
+  for (let k = 0; k < 2; k++) {
+    const { X0, X1 } = P[k];
+    el(svg, 'rect', { x: X0, y: Y0, width: X1 - X0, height: Y1 - Y0, fill: 'none', stroke: '#000000' });
+    for (const v of tk(ax[k][0], ax[k][1], 6)) { const [x] = map(k, v, 0); el(svg, 'line', { x1: x, y1: Y1, x2: x, y2: Y1 - 5, stroke: '#000000' }); txt(svg, x, Y1 + 15, String(v), { 'text-anchor': 'middle', 'font-size': 12 }); }
+    for (const v of tk(ax[k][2], ax[k][3], 6)) { const [, y] = map(k, 0, v); el(svg, 'line', { x1: X0, y1: y, x2: X0 + 5, y2: y, stroke: '#000000' }); txt(svg, X0 - 5, y + 4, String(v), { 'text-anchor': 'end', 'font-size': 12 }); }
+    txt(svg, (X0 + X1) / 2, Y1 + 32, P[k].xl, { 'text-anchor': 'middle', 'font-size': 13 });
+    txt(svg, X0 - 36, (Y0 + Y1) / 2, P[k].yl, { 'text-anchor': 'middle', 'font-size': 13, transform: `rotate(-90 ${X0 - 36} ${(Y0 + Y1) / 2})` });
+    txt(svg, X1 - 8, Y1 - 10, k ? '(b)' : '(a)', { 'font-size': 13, 'text-anchor': 'end' });
+  }
+  // (a) Tomiyama et al. for the three systems at this surface tension
+  const styles = { pure: ['#000000', 'none', 'pure'], slight: ['#000000', '6 4', 'slightly contaminated'], full: ['#0000cc', 'none', 'fully contaminated'] };
+  let li = 0;
+  for (const sys of ['pure', 'slight', 'full']) {
+    let d = '';
+    for (let i = 0; i <= 300; i++) { const dd = 0.2 + (dMax - 0.2) * i / 300, [x, y] = map(0, dd, riseVelocity(dd * 1e-3, sys, SW.mu, u.sigma)); d += (i ? 'L' : 'M') + x.toFixed(1) + ',' + Math.max(Y0, y).toFixed(1); }
+    el(svg, 'path', { d, fill: 'none', stroke: styles[sys][0], 'stroke-dasharray': styles[sys][1], 'stroke-width': 1.2 });
+    const ly = Y0 + 34 + 15 * li++;
+    el(svg, 'line', { x1: 150, y1: ly - 4, x2: 175, y2: ly - 4, stroke: styles[sys][0], 'stroke-dasharray': styles[sys][1], 'stroke-width': 1.2 });
+    txt(svg, 180, ly, styles[sys][2], { 'font-size': 12 });
+  }
+  // (b) Wellek et al.
+  let dw = '';
+  for (let i = 0; i <= 80; i++) { const Eo = EoMax * i / 80, [x, y] = map(1, Eo, aspectWellek(Eo)); dw += (i ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1); }
+  el(svg, 'path', { d: dw, fill: 'none', stroke: '#0000cc', 'stroke-width': 1.2 });
+  // points
+  const cross = (k, x, y) => { const [px, py] = map(k, x, y); el(svg, 'path', { d: `M${px - 6},${py}h12M${px},${py - 6}v12`, stroke: '#cc0000', 'stroke-width': 1.6 }); };
+  for (const q of pts) {
+    const [x1, y1] = map(0, q.d * 1e3, q.U), [x2, y2] = map(1, eotvos(q.d, u.sigma), q.E);
+    el(svg, 'circle', { cx: x1, cy: y1, r: 2.4, fill: 'none', stroke: '#cc0000' });
+    el(svg, 'circle', { cx: x2, cy: y2, r: 2.4, fill: 'none', stroke: '#cc0000' });
+  }
+  if (!file && info) { cross(0, u.d * 1e3, info.U); cross(1, info.Eo, info.E); }
+  $('cap6').innerHTML = `<b>Figure 6.</b> (a) Rise speed against bubble size from the drag correlation of Tomiyama et al. (1998) for a surface tension of ${fmt(u.sigma * 1e3, 4)} mN/m, and (b) aspect ratio against the Eötvös number from Wellek et al. (1966), for contaminated liquids. ${file ? `Red circles: the ${pts.length} tracks of the file with at least 10 points, each at its mean size, rise speed and aspect ratio.` : 'Red cross: the bubbles of Figure 5.'} A lower surface tension, for example from a surfactant, raises Eo and so lowers the rise speed of the larger bubbles.`;
+  if (file) {
+    const S = swState.tracks.stats.filter((q) => q.n >= 10), m = (f) => S.reduce((s, q) => s + f(q), 0) / S.length, sd = (f) => { const mu = m(f); return Math.sqrt(S.reduce((s, q) => s + (f(q) - mu) ** 2, 0) / Math.max(1, S.length - 1)); };
+    const dm = m((q) => q.d), Um = m((q) => q.U);
+    const extra = [
+      ['Tracks with at least 10 points', String(S.length)],
+      ['Diameter over the tracks', `${fmt(dm * 1e3, 3)} ± ${fmt(sd((q) => q.d) * 1e3, 2)} mm`],
+      ['Rise speed over the tracks', `${fmt(Um, 3)} ± ${fmt(sd((q) => q.U), 2)} m/s`],
+      ['Aspect ratio c/a over the tracks', `${fmt(m((q) => q.E), 3)} (Wellek et al. at this size: ${fmt(aspectWellek(eotvos(dm, u.sigma)), 3)})`],
+      ['Horizontal velocity, rms within a track', `${fmt(m((q) => q.vh), 3)} m/s`],
+      ['Reynolds number of the mean bubble', fmt(SW.rhoL * Um * dm / SW.mu, 3)],
+      ['Rise speed from Tomiyama et al. at this size: pure, slightly, fully contaminated', ['pure', 'slight', 'full'].map((q) => fmt(riseVelocity(dm, q, SW.mu, u.sigma), 3)).join(', ') + ' m/s'],
+    ];
+    swState.statsHtml = extra.map((q) => `<tr><td>${q[0]}</td><td class="l">${q[1]}</td></tr>`).join('');
+    $('swres').innerHTML += swState.statsHtml;
+  }
+}
+
+// ---------- playing ----------
+function swTick(ts) {
+  if (!swState.playing) return;
+  const wall = swState.last ? Math.min(0.2, (ts - swState.last) / 1000) : 0;
+  swState.last = ts;
+  const sim = wall * parseFloat($('swspeed').value);
+  if ($('swsrc').value === 'file' && swState.tracks) {
+    const T = swState.tracks, r = $('swstep');
+    swState.acc += sim;
+    const n = Math.floor(swState.acc / T.dt);
+    if (n > 0) { swState.acc -= n * T.dt; r.value = String((parseInt(r.value, 10) + n) % T.keys.length); }
+  } else swState.t += sim;
+  drawSwarm(true);
+  requestAnimationFrame(swTick);
+}
+function swSetPlaying(on) {
+  swState.playing = on; swState.last = 0; swState.acc = 0;
+  $('swplay').value = on ? 'Pause' : 'Play';
+  if (on) requestAnimationFrame(swTick); else drawSwarm();
 }
 function loadTracks(file) {
   const rd = new FileReader();
@@ -1136,6 +1248,10 @@ function loadTracks(file) {
     try {
       const T = parseTracks(String(rd.result));
       T.all = [].concat(...T.keys.map((k) => T.steps.get(k)));
+      const byId = tracksById(T);
+      T.dt = trackTimeStep(byId);
+      if (!(T.dt > 0)) T.dt = 1e-3;
+      T.stats = [...byId.values()].map((q) => trackStats(q));
       swState.tracks = T; swState.fileName = file.name;
       const r = $('swstep'); r.max = String(T.keys.length - 1); r.value = '0';
       const zs = T.all.map((b) => b.z).sort((p, q) => p - q);
@@ -1170,9 +1286,11 @@ $('pivform').addEventListener('submit', (ev) => { ev.preventDefault(); pivSeed =
 document.querySelectorAll('input[name="frame"]').forEach((q) => q.addEventListener('change', () => { if (pivRec) { drawPivImage(); drawPivVectors(current); } }));
 
 $('swform').addEventListener('submit', (ev) => { ev.preventDefault(); drawSwarm(); });
-$('swnew').addEventListener('click', () => { swState.seed = (swState.seed * 1103515245 + 12345) >>> 0; if ($('swsrc').value !== 'model') $('swsrc').value = 'model'; drawSwarm(); });
-['swsrc', 'swn', 'swd', 'swsys', 'swz', 'sweps', 'swL', 'swshow'].forEach((q) => $(q).addEventListener('change', drawSwarm));
-$('swstep').addEventListener('input', drawSwarm);
+$('swnew').addEventListener('click', () => { swState.seed = (swState.seed * 1103515245 + 12345) >>> 0; swState.t = 0; if ($('swsrc').value !== 'model') $('swsrc').value = 'model'; drawSwarm(); });
+['swsrc', 'swarr', 'swsp', 'swsig', 'swn', 'swd', 'swsys', 'swz', 'sweps', 'swL', 'swshow'].forEach((q) => $(q).addEventListener('change', () => drawSwarm()));
+$('swstep').addEventListener('input', () => drawSwarm(swState.playing));
+$('swplay').addEventListener('click', () => swSetPlaying(!swState.playing));
+$('swback').addEventListener('click', () => { swState.t = 0; $('swstep').value = '0'; drawSwarm(swState.playing); });
 $('swfile').addEventListener('change', () => { const f = $('swfile').files[0]; if (f) { $('swsrc').value = 'file'; loadTracks(f); } });
 
 writeChecks();
