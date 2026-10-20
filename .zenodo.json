@@ -1,0 +1,8 @@
+{
+ "title": "Bubble and particle collision: flow around a rising bubble, collision efficiency, synthetic PIV and turbulence around bubbles",
+ "upload_type": "software",
+ "creators": [{ "name": "Ishaque, Hashim" }],
+ "license": "MIT",
+ "keywords": ["flotation", "bubble-particle collision", "collision efficiency", "Navier-Stokes", "lattice Boltzmann", "Maxey-Riley", "particle image velocimetry", "turbulence"],
+ "description": "A browser program, with a command-line interface, for the flow around a rising bubble and the collision of particles with it, as in flotation. Every part is checked against exact solutions or published values; the checks run on every change."
+}

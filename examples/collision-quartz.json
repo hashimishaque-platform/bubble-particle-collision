@@ -1,0 +1,9 @@
+{
+ "tool": "collision",
+ "bubbleDiameter_mm": [0.6, 1.0],
+ "surface": "immobile",
+ "grid": "normal",
+ "particleDiameter_um": [10, 30, 60],
+ "particleDensity_kg_m3": 2650,
+ "inertia": true
+}

@@ -44,6 +44,7 @@ table.data th:first-child, table.data td:first-child { text-align: left; }
 table.data td.l, table.data th.l { text-align: left; }
 table.data tr.group td { font-weight: bold; text-align: left; background: #f0f0f0; }
 .scroll { overflow-x: auto; max-width: 100%; }
+p.dl input { margin: 0 4px 4px 0; font-size: 14px; }
 pre { font-size: 14px; overflow-x: auto; margin: 0 0 10px 0; }
 #notes p, #pivnotes p { margin: 0 0 6px 0; }
 #status { min-height: 1.4em; }
@@ -55,7 +56,7 @@ table.data.wide { min-width: 40em; }
 
 <p class="small"><a href="/*HOME*/" target="_blank" rel="noopener">Hashim Ishaque</a> &gt; Bubble and particle collision</p>
 
-<h1>Bubble and particle collision: the flow around a rising bubble</h1>
+<h1 id="top">Bubble and particle collision: the flow around a rising bubble</h1>
 <p class="text">
 In flotation, mineral particles are collected by air bubbles rising through a suspension. Before
 a particle can stick to a bubble it has to hit it, and whether it hits depends on the flow
@@ -106,11 +107,12 @@ yourself; it is read in your browser and is not part of this program.
     </form>
     <p class="small" id="status" aria-live="polite"></p>
     <div class="scroll"><table class="data" id="results"></table></div>
+    <p class="small dl"><input type="button" id="dl1" value="Results (JSON)"> <input type="button" id="dl1p" value="Figure 1 paths (CSV)"> <input type="button" id="dl2" value="Figure 2 curves (CSV)"> <input type="button" id="lk1" value="Link to these settings"></p>
     <div id="notes" class="small"></div>
   </div>
 </div>
 
-<h2>Synthetic PIV of the same flow</h2>
+<h2 id="piv">Synthetic PIV of the same flow</h2>
 <p class="text">
 The program renders two frames of tracer particles that move with the computed flow, as a
 camera would record them in a light sheet through the bubble axis, then evaluates the pair with
@@ -150,11 +152,12 @@ can be checked against it.
     </form>
     <p class="small" id="pivstatus" aria-live="polite"></p>
     <div class="scroll"><table class="data" id="pivres"></table></div>
+    <p class="small dl"><input type="button" id="dl3" value="PIV vectors (CSV)"> <input type="button" id="dl4" value="Figure 4 profiles (CSV)"> <input type="button" id="lk3" value="Link to these settings"></p>
     <div id="pivnotes" class="small"></div>
   </div>
 </div>
 
-<h2>Bubble swarm in a flotation cell</h2>
+<h2 id="swarm">Bubble swarm in a flotation cell</h2>
 <p class="text">
 In a flotation cell many bubbles rise together through turbulent liquid. Figure 5 shows a cut
 through such a swarm. Each bubble pushes the liquid aside as it rises, and the impeller keeps
@@ -209,11 +212,12 @@ not uploaded or stored anywhere.
     </form>
     <p class="small" id="swstatus" aria-live="polite"></p>
     <div class="scroll"><table class="data" id="swres"></table></div>
+    <p class="small dl"><input type="button" id="dl5j" value="Swarm and results (JSON)"> <input type="button" id="dl5" value="Figure 5 velocity field (CSV)"> <input type="button" id="dl6" value="Figure 6 data (CSV)"> <input type="button" id="lk5" value="Link to these settings"></p>
     <div id="swnotes" class="small"></div>
   </div>
 </div>
 
-<h2>Turbulence around a bubble: live flow simulation</h2>
+<h2 id="live-flow">Turbulence around a bubble: live flow simulation</h2>
 <p class="text">
 Figure 5 adds turbulence to the flow around bubbles but does not let the bubbles make any.
 Here the flow is computed instead. The liquid streams past a bubble held in place, as in a
@@ -263,6 +267,7 @@ the notes below.
     </form>
     <p class="small" id="lbstatus" aria-live="polite"></p>
     <div class="scroll"><table class="data" id="lbres"></table></div>
+    <p class="small dl"><input type="button" id="dl7j" value="Results (JSON)"> <input type="button" id="dl7" value="Averaged fields (CSV)"> <input type="button" id="dl8" value="Figure 8 data (CSV)"> <input type="button" id="lk7" value="Link to these settings"></p>
     <div id="lbnotes" class="small"></div>
   </div>
 </div>
@@ -333,7 +338,7 @@ turbulence is strongest. Press "New averages" after changing the picture setting
 averages a few shedding periods before reading them.
 </p>
 
-<h2>Model</h2>
+<h2 id="model">Model</h2>
 <p>
 <b>Flow.</b> Steady, axisymmetric flow of water past a spherical bubble, in the frame of the
 bubble. The equations are written for the stream function ψ and the vorticity variable
@@ -447,14 +452,14 @@ U² and ε with U³/d. The shedding frequency is read from the cross-stream velo
 behind the bubble.
 </p>
 
-<h2>Checks</h2>
+<h2 id="checks-section">Checks</h2>
 <p>
 These numbers come from running this page's code with both grids and a tighter convergence
 tolerance (10<sup>−9</sup>); the script that produces them, checks.js, comes with the source code.
 </p>
 <div class="scroll"><table class="data wide" id="checks"></table></div>
 
-<h2>Limitations</h2>
+<h2 id="limitations">Limitations</h2>
 <ul>
 <li>The flow is steady and axisymmetric. Behind a sphere with an immobile surface that holds
 up to a Reynolds number of about 210, so the bubble size is limited to keep Re below about
@@ -484,7 +489,21 @@ collisions and the turbulence in the wake, not numbers for a real cell.</li>
 refraction at the bubble surface, tracers that follow the flow exactly.</li>
 </ul>
 
-<h2>References</h2>
+<h2 id="validity">Range of validity</h2>
+<p>Each part of the program rests on a model with its own limits. The form keeps the inputs inside
+the ranges below where it can, and the notes under each result say when a case is near a limit.</p>
+<div class="scroll"><table class="data wide">
+<tr><th>Part</th><th class="l">Valid for</th><th class="l">Checked here</th></tr>
+<tr><td>Navier-Stokes flow around the bubble (Figures 1 to 4)</td><td class="l">Steady, axisymmetric flow past a sphere; bubble diameter up to 1.2 mm with frother (Re below about 160) and 0.7 mm in clean water</td><td class="l">Drag, wake length and separation angle for Re = 0.1 to 150</td></tr>
+<tr><td>Rise speed, Figures 1 to 4</td><td class="l">Schiller-Naumann for an immobile surface (Re below 800); Mei, Klausner and Lawrence for a clean spherical bubble</td><td class="l">Drag of the computed flow against both, Re = 0.1 to 100</td></tr>
+<tr><td>Particle motion</td><td class="l">Maxey-Riley equation without history and lift forces; particles much smaller than the bubble (at most 0.3 times its diameter); particles do not disturb the flow</td><td class="l">Paths without inertia against the exact stream function; two integrators against each other</td></tr>
+<tr><td>Collision correlations</td><td class="l">Sutherland: potential flow, mobile surface, small particles. Weber-Paddock and Yoon-Luttrell: immobile surface, intermediate Re</td><td class="l">Against the computed flow for Re = 1 to 100</td></tr>
+<tr><td>Synthetic PIV</td><td class="l">Motion within the light sheet only; no reflections at the bubble</td><td class="l">Random error for a uniform shift</td></tr>
+<tr><td>Bubble swarm (Figures 5 and 6)</td><td class="l">Kinematic picture: potential flow around volume-equivalent spheres a few radii apart; frozen, homogeneous synthetic turbulence; Tomiyama drag and Wellek shape for single bubbles (Wellek: contaminated liquids)</td><td class="l">Surface condition and divergence of the bubble flow; energy and divergence of the turbulence; limits of the drag correlation</td></tr>
+<tr><td>Live flow simulation (Figures 7 and 8)</td><td class="l">Two-dimensional flow past an elliptic cylinder with an immobile surface; Re up to 1500 in the program, with a subgrid model above a few hundred; 20 cells per diameter</td><td class="l">Taylor-Green decay; cylinder benchmark at Re = 100; particle response</td></tr>
+</table></div>
+
+<h2 id="references">References</h2>
 <ol>
 <li>Clift, R.; Grace, J. R.; Weber, M. E. <i>Bubbles, Drops, and Particles.</i> Academic Press, 1978.</li>
 <li>Johnson, T. A.; Patel, V. C. Flow past a sphere up to a Reynolds number of 300. <i>J. Fluid Mech.</i> 378 (1999) 19 to 70. <a href="https://doi.org/10.1017/S0022112098003206" target="_blank" rel="noopener">doi:10.1017/S0022112098003206</a></li>
@@ -522,7 +541,7 @@ refraction at the bubble surface, tracers that follow the flow exactly.</li>
 </ol>
 
 <hr>
-<p class="small">H. Ishaque, October 2026. <a href="/*HOME*/" target="_blank" rel="noopener">Home page</a>.</p>
+<p class="small">H. Ishaque, October 2026. Version /*VERSION*/. <a href="https://github.com/hashimishaque-platform/bubble-particle-collision" target="_blank" rel="noopener">Source code</a>; to cite this program, use the "Cite this repository" box on that page (file CITATION.cff). <a href="/*HOME*/" target="_blank" rel="noopener">Home page</a>.</p>
 
 </div>
 </div>
@@ -595,11 +614,58 @@ function readInputs() {
   return { surf, grid: $('grid').value, db, dp, rhop, dbClamped, dpClamped };
 }
 
-// ---------- flow solve in small steps, so the page stays responsive ----------
+// ---------- flow solve in a Web Worker, so the page stays responsive ----------
+// The worker runs the same code (flow.js) with the same steps as the fallback below, so the result is identical.
+const FLOW_SRC = /*FLOWSRC*/;
+const WORKER_SRC = FLOW_SRC + `
+onmessage = (ev) => {
+  const { Re, surf, g } = ev.data;
+  let lam = 0.8, st = createState(Re, surf, Object.assign({ lam }, g)), last = Date.now();
+  for (;;) {
+    const rel = iterate(st, 25);
+    if (st.diverged) { lam *= 0.5; st = createState(Re, surf, Object.assign({ lam }, g)); continue; }
+    if (rel < 1e-8) { st.converged = true; break; }
+    if (st.iters > 80000) break;
+    if (Date.now() - last > 150) { postMessage({ progress: st.iters, cd: dragCoefficient(st).cd }); last = Date.now(); }
+  }
+  postMessage({ st });
+};`;
+let flowWorker = null, workerOk = typeof Worker !== 'undefined';
+function solveInWorker(Re, surf, g, id) {
+  return new Promise((resolve) => {
+    try {
+      if (flowWorker) flowWorker.terminate();
+      flowWorker = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: 'text/javascript' })));
+    } catch (e) { workerOk = false; resolve(undefined); return; }
+    const w = flowWorker;
+    w.onerror = () => { workerOk = false; w.terminate(); resolve(undefined); };
+    w.onmessage = (ev) => {
+      if (id !== run) { w.terminate(); resolve(null); return; }
+      if (ev.data.progress !== undefined) { $('status').textContent = `Solving the Navier-Stokes equations: iteration ${ev.data.progress}, drag coefficient ${fix(ev.data.cd, 4)}.`; return; }
+      w.terminate(); if (flowWorker === w) flowWorker = null;
+      resolve(ev.data.st);
+    };
+    w.postMessage({ Re, surf, g });
+  });
+}
 async function solve(Re, surf, grid, id) {
   const key = `${Re.toFixed(4)}|${surf}|${grid}`;
   if (cache.has(key)) return { st: cache.get(key), cached: true };
   const g = gridFor(Re, surf, grid);
+  if (workerOk) {
+    const t0 = now();
+    const st = await solveInWorker(Re, surf, g, id);
+    if (st === null || id !== run) return null;
+    if (st) {
+      st.seconds = (now() - t0) / 1000;
+      st.ev = psiEvaluator(st);
+      st.sample = flowSampler(st);
+      st.worker = true;
+      cache.set(key, st);
+      return { st, cached: false };
+    }
+  }
+  // fallback without a worker: the same iterations in small blocks on the page
   let lam = 0.8;
   let st = createState(Re, surf, Object.assign({ lam }, g));
   const t0 = now();
@@ -850,6 +916,7 @@ function drawEfficiency(c) {
     if (rigid) { Ec.push(ecWeberPaddock(p.rp, c.Re)); Ey.push(ecYoonLuttrell(p.rp, c.Re)); }
     else { Ec.push(ecSutherland(p.rp)); Ey.push(p.rp + p.rp * p.rp); }
   }
+  c.fig2 = { ds, Eg, Ei, Ec, Ey, rigid };
   const curve = c.curve || [];
   const all = Eg.concat(Ei, Ec, Ey, curve.map((q) => q[1]), c.Einr ? [c.Einr.E] : []).filter((v) => v > 0);
   const eLo = Math.pow(10, Math.floor(Math.log10(Math.min(...all))));
@@ -1169,11 +1236,13 @@ function drawSwarm(still) {
     return v;
   };
   // speed in the plane on the grid, drawn as an image
-  const sp = new Float64Array(NX * NY);
+  const sp = new Float64Array(NX * NY), gu = new Float64Array(NX * NY).fill(NaN), gv = new Float64Array(NX * NY).fill(NaN);
   for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) {
     const v = velAt(D.x0 + (i + 0.5) * cell, D.y1 - (j + 0.5) * cell);
     sp[j * NX + i] = v ? Math.hypot(v[0], v[1]) : -1;
+    if (v) { gu[j * NX + i] = v[0]; gv[j * NX + i] = v[1]; }
   }
+  swState.field = { D, NX, NY, cell, gu, gv, z: u.z, bubbles, u, turb: T ? { eps: u.eps, L: u.L, eta: T.eta, kN: T.kN, uRms: T.uRms } : null };
   const sorted = Array.from(sp).filter((q) => q >= 0).sort((p, q) => p - q);
   const vMax = Math.max(1e-6, sorted[Math.floor(0.98 * (sorted.length - 1))] || 0);
   const shade = (q) => { const t = clamp(q / vMax, 0, 1); return [Math.round(255 - 205 * t), Math.round(255 - 165 * t), 255 - Math.round(35 * t)]; };
@@ -1573,6 +1642,129 @@ function lbSetPlaying(on) {
   if (on) requestAnimationFrame(lbTick); else { lbDraw(); lbWrite(); }
 }
 
+// ---------- downloads and links to settings ----------
+const VERSION = '/*VERSION*/';
+function saveFile(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: type || 'text/plain' }));
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+const csvNum = (x) => (x === null || x === undefined || (typeof x === 'number' && !isFinite(x)) ? '' : typeof x === 'number' ? String(+x.toPrecision(10)) : String(x));
+// header lines start with #: program, version, date and a note; then one header row and the data rows
+function toCSV(title, notes, head, rows) {
+  const meta = [`# ${title}`, `# Bubble and particle collision, version ${VERSION}, https://hashimishaque.com/bubble-particle-collision/`, `# Written ${new Date().toISOString()}`].concat(notes.map((n) => `# ${n}`));
+  return meta.join('\n') + '\n' + head.join(',') + '\n' + rows.map((r) => r.map(csvNum).join(',')).join('\n') + '\n';
+}
+const toJSON = (o) => JSON.stringify(Object.assign({ program: 'Bubble and particle collision', version: VERSION, url: location.href.split('#')[0], written: new Date().toISOString() }, o), (k, v) => (v instanceof Float64Array || v instanceof Float32Array ? Array.from(v) : typeof v === 'number' && !isFinite(v) ? null : v), 1);
+const needCurrent = () => { if (!current) { $('status').textContent = 'Nothing computed yet.'; return false; } return true; };
+
+$('dl1').addEventListener('click', () => {
+  if (!needCurrent()) return;
+  const c = current;
+  saveFile('collision-results.json', toJSON({
+    settings: { bubbleDiameter_m: c.inp.db, surface: c.inp.surf === 'rigid' ? 'immobile (with frother)' : 'mobile (clean water)', grid: c.inp.grid, particleDiameter_m: c.inp.dp, particleDensity_kg_m3: c.inp.rhop, liquid: 'water at 20 C', rhoL: RHO_L, mu: MU },
+    results: { riseSpeed_m_s: c.U, Re: c.Re, We: c.We, dragCoefficient: dragCoefficient(c.st).cd, wakeLength_d: wakeLength(c.st), separationAngle_deg: separationAngle(c.st),
+      StokesNumber: c.pp.St, settlingSpeedOverU: c.pp.ws, E_interception: c.Ei.E, E_interceptionAndSettling: c.Eg.E, E_withInertia: c.Einr ? c.Einr.E : null },
+    grid: { N: c.st.N, M: c.st.M, Rmax: c.st.Rmax, iterations: c.st.iters, converged: c.st.converged },
+  }), 'application/json');
+});
+$('dl1p').addEventListener('click', () => {
+  if (!needCurrent()) return;
+  const rows = [];
+  current.trajs.forEach((t, k) => t.path.forEach((p) => rows.push([k + 1, t.hit ? 1 : 0, t.grazing ? 1 : 0, p[0], p[1]])));
+  saveFile('figure1-paths.csv', toCSV('Figure 1: particle paths in the frame of the bubble', ['x: distance from the axis, z: along the flow, both in bubble radii; the bubble centre is at the origin', 'hit = 1 if the particle collides; grazing = 1 for the grazing path'], ['path', 'hit', 'grazing', 'x_over_a', 'z_over_a'], rows), 'text/csv');
+});
+$('dl2').addEventListener('click', () => {
+  if (!needCurrent() || !current.fig2) return;
+  const f = current.fig2, inr = new Map((current.curve || []).map((q) => [q[0], q[1]]));
+  const rows = f.ds.map((d, k) => [d, f.Ei[k], f.Eg[k], f.Ec[k], f.Ey[k]]);
+  for (const [d, E] of inr) rows.push([d, '', '', '', '', E]);
+  rows.sort((a, b) => a[0] - b[0]);
+  const names = f.rigid ? ['E_WeberPaddock', 'E_YoonLuttrell'] : ['E_Sutherland', 'E_rp_plus_rp2'];
+  saveFile('figure2-collision-efficiency.csv', toCSV('Figure 2: collision efficiency against particle diameter', [`bubble ${current.inp.db} m, ${f.rigid ? 'immobile' : 'mobile'} surface, Re = ${current.Re}`, 'E_withInertia: computed from particle paths with inertia, only at some diameters'], ['particle_diameter_m', 'E_interception', 'E_interception_settling'].concat(names, ['E_withInertia']), rows), 'text/csv');
+});
+$('dl3').addEventListener('click', () => {
+  if (!pivRes) return;
+  const r = pivRes, rec = pivRec, rows = [];
+  for (let j = 0; j < r.ny; j++) for (let i = 0; i < r.nx; i++) {
+    const k = j * r.nx + i, [x, z] = rec.toPhys(r.cx[i], r.cy[j]);
+    rows.push([r.cx[i], r.cy[j], x, z, r.valid[k] ? r.U[k] : '', r.valid[k] ? r.V[k] : '', r.valid[k] ? r.trueU[k] : '', r.valid[k] ? r.trueV[k] : '', r.valid[k] ? 1 : 0, r.outlier[k] ? 1 : 0]);
+  }
+  saveFile('piv-vectors.csv', toCSV('Synthetic PIV vectors and the exact displacements', [`window ${r.window} px, step ${r.step} px, ${rec.S} px per bubble radius, free-stream displacement ${rec.d0} px`, 'displacements in pixels; x, z in bubble radii'], ['px', 'py', 'x_over_a', 'z_over_a', 'dx_piv_px', 'dy_piv_px', 'dx_exact_px', 'dy_exact_px', 'valid', 'replaced_outlier'], rows), 'text/csv');
+});
+$('dl4').addEventListener('click', () => {
+  if (!pivRes || !current) return;
+  const r = pivRes, rec = pivRec, rows = [];
+  for (let j = 0; j < r.ny; j++) for (let i = 0; i < r.nx; i++) {
+    const k = j * r.nx + i;
+    if (!r.valid[k]) continue;
+    const [x, z] = rec.toPhys(r.cx[i], r.cy[j]);
+    rows.push([x, z, r.V[k] / rec.d0, rec.move ? current.st.sample(x, z)[1] : '']);
+  }
+  saveFile('figure4-profiles.csv', toCSV('Velocity along the flow from PIV and exact, at every PIV vector', ['u_z / U; the profiles in Figure 4 are the row nearest z = 0 and the column nearest x = 0'], ['x_over_a', 'z_over_a', 'uz_over_U_piv', 'uz_over_U_exact'], rows), 'text/csv');
+});
+$('dl5j').addEventListener('click', () => {
+  const F = swState.field;
+  if (!F) return;
+  saveFile('swarm.json', toJSON({ settings: F.u, turbulence: F.turb, swarm: swState.swarm && F.u.src === 'model' ? { riseSpeed_m_s: swState.swarm.U, Re: swState.swarm.Re, Eo: swState.swarm.Eo, aspectRatio: swState.swarm.E, semiAxes_mm: [swState.swarm.a, swState.swarm.c] } : null, bubbles_mm_m_s_deg: F.bubbles, tracks: F.u.src === 'file' && swState.tracks ? { file: swState.fileName, timeStep_s: swState.tracks.dt, stats: swState.tracks.stats } : null }), 'application/json');
+});
+$('dl5').addEventListener('click', () => {
+  const F = swState.field;
+  if (!F) return;
+  const rows = [];
+  for (let j = 0; j < F.NY; j++) for (let i = 0; i < F.NX; i++) { const k = j * F.NX + i; rows.push([F.D.x0 + (i + 0.5) * F.cell, F.D.y1 - (j + 0.5) * F.cell, F.gu[k], F.gv[k]]); }
+  saveFile('figure5-velocity.csv', toCSV('Figure 5: liquid velocity in the cut', [`cut at z = ${F.z} mm; x, y in mm, y upwards; velocities in m/s; empty inside bubbles`], ['x_mm', 'y_mm', 'u_m_s', 'v_m_s'], rows), 'text/csv');
+});
+$('dl6').addEventListener('click', () => {
+  const u = swInputs(), rows = [];
+  for (let k = 0; k <= 60; k++) { const d = (0.2 + 5.8 * k / 60) * 1e-3, Eo = eotvos(d, u.sigma); rows.push(['curve', d, riseVelocity(d, 'pure', SW.mu, u.sigma), riseVelocity(d, 'slight', SW.mu, u.sigma), riseVelocity(d, 'full', SW.mu, u.sigma), Eo, aspectWellek(Eo)]); }
+  if (u.src === 'file' && swState.tracks) for (const q of swState.tracks.stats) rows.push(['track', q.d, '', '', '', eotvos(q.d, u.sigma), '', q.U, q.E, q.vh, q.n]);
+  saveFile('figure6-rise-speed-shape.csv', toCSV('Figure 6: rise speed and aspect ratio', [`surface tension ${u.sigma} N/m; correlations of Tomiyama et al. (1998) and Wellek et al. (1966)`, 'rows of kind track: mean values of one track of the loaded file'], ['kind', 'd_m', 'U_pure_m_s', 'U_slight_m_s', 'U_full_m_s', 'Eo', 'aspect_Wellek', 'U_track_m_s', 'aspect_track', 'horizontal_velocity_rms_m_s', 'points'], rows), 'text/csv');
+});
+$('dl7j').addEventListener('click', () => {
+  const L = lbState, s = L.s, u = L.inp, hits = L.hits;
+  saveFile('live-flow.json', toJSON({ settings: { bubbleDiameter_m: u.d, speed_m_s: u.U, Re: L.Re, aspectRatio: u.E, gridDiametersUpstream: u.grid, particleDiameter_m: u.dp, particleDensity_kg_m3: u.rhop },
+    lattice: { cellsPerDiameter: LBG.D, nx: s.nx, ny: s.ny, U: LBG.U, nu: L.nu, smagorinsky: LBG.Cs, sponge: LBG.sponge, steps: s.t, averages: s.stats ? s.stats.n : 0 },
+    results: { StokesNumber: L.St, sheddingStrouhal: lbShedding(), collisionsFront: hits.filter((q) => q < 90).length, collisionsRear: hits.filter((q) => q >= 90).length, collisionAngles_deg: hits } }), 'application/json');
+});
+$('dl7').addEventListener('click', () => {
+  const L = lbState, s = L.s, u = L.inp;
+  if (!s.stats || s.stats.n < 3) { $('lbstatus').textContent = 'No averages yet.'; return; }
+  const st = lbStatsFields(s), rows = [], kS = u.U * u.U / (LBG.U * LBG.U), eS = (u.U ** 3 / u.d) / (LBG.U ** 3 / LBG.D), xS = u.d / LBG.D;
+  for (let y = 0; y < s.ny; y++) for (let x = 0; x < s.nx; x++) { const k = y * s.nx + x; if (s.solid[k]) continue; rows.push([(x - LBG.xb) * xS, (y - L.yb) * xS, st.U[k] / LBG.U * u.U, st.V[k] / LBG.U * u.U, st.K[k] * kS, st.E[k] * eS]); }
+  saveFile('live-flow-averages.csv', toCSV('Figure 7: time-averaged flow around the bubble', [`${st.n} samples; x along the flow and y across, in m, from the bubble centre; two-dimensional simulation`], ['x_m', 'y_m', 'U_mean_m_s', 'V_mean_m_s', 'k_m2_s2', 'eps_W_kg'], rows), 'text/csv');
+});
+$('dl8').addEventListener('click', () => {
+  const L = lbState, s = L.s, u = L.inp;
+  const st = s.stats && s.stats.n > 2 ? lbStatsFields(s) : null, rows = [];
+  for (let a = 0; a <= 180; a += 5) {
+    const t = a * Math.PI / 180, x = LBG.xb - 1.5 * L.cx * Math.cos(t), dy = 1.5 * L.ay * Math.sin(t);
+    const val = (F) => (st ? 0.5 * (lbInterp(s, F, x, L.yb + dy) + lbInterp(s, F, x, L.yb - dy)) : NaN);
+    rows.push(['ring', a, val(st ? st.K : null) * u.U * u.U / (LBG.U * LBG.U), val(st ? st.E : null) * (u.U ** 3 / u.d) / (LBG.U ** 3 / LBG.D), '']);
+  }
+  const bins = new Array(9).fill(0); for (const h of L.hits) bins[Math.min(8, Math.floor(h / 20))]++;
+  bins.forEach((q, i) => rows.push(['collisions', 20 * i + 10, '', '', q]));
+  saveFile('figure8.csv', toCSV('Figure 8: turbulence on a curve 1.5 times the bubble size, and collisions in 20 degree bins', ['angle from the front stagnation point in degrees; k in m2/s2, eps in W/kg; for collisions the angle is the bin centre'], ['kind', 'angle_deg', 'k_m2_s2', 'eps_W_kg', 'count'], rows), 'text/csv');
+});
+
+// settings in the address: ?db=1&surf=rigid... and #section; links can be shared to reproduce a case
+const LINK_IDS = ['db', 'surf', 'grid', 'preset', 'dp', 'rhop', 'win', 'ppp', 'd0', 'noise', 'swarr', 'swn', 'swd', 'swsys', 'swsp', 'swsig', 'swz', 'sweps', 'swL', 'swshow', 'lbd', 'lbu', 'lbe', 'lbg', 'lbdp', 'lbrp', 'lbshow', 'lbspf'];
+function settingsLink(anchor) {
+  const q = LINK_IDS.map((id) => `${id}=${encodeURIComponent($(id).value)}`).join('&');
+  const url = `${location.href.split(/[?#]/)[0]}?${q}#${anchor}`;
+  try { history.replaceState(null, '', url); } catch (e) { /* file pages */ }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).catch(() => {});
+  return url;
+}
+function applySettingsFromAddress() {
+  let p;
+  try { p = new URLSearchParams(location.search); } catch (e) { return; }
+  for (const id of LINK_IDS) if (p.has(id) && $(id)) $(id).value = p.get(id);
+}
+[['lk1', 'top', 'status'], ['lk3', 'piv', 'pivstatus'], ['lk5', 'swarm', 'swstatus'], ['lk7', 'live-flow', 'lbstatus']].forEach(([b, a, out]) => $(b).addEventListener('click', () => { settingsLink(a); $(out).textContent = 'The address now holds these settings and was copied, if the browser allows it. Open it to start from the same case.'; }));
+
 // ---------- checks table ----------
 function writeChecks() {
   let html = '<tr><th>Check</th><th>Expected</th><th>Normal grid</th><th>Fine grid</th><th class="l">Source</th></tr>';
@@ -1609,6 +1801,7 @@ $('lbreset').addEventListener('click', () => { lbStatsReset(lbState.s); lbState.
 ['lbd', 'lbu', 'lbe', 'lbg', 'lbdp', 'lbrp'].forEach((q) => $(q).addEventListener('change', () => { const on = lbState.playing; lbBuild(); if (on) lbSetPlaying(true); }));
 ['lbshow', 'lbspf'].forEach((q) => $(q).addEventListener('change', () => { lbState.inp = Object.assign(lbState.inp, { show: $('lbshow').value, spf: parseInt($('lbspf').value, 10) }); lbDraw(); lbWrite(); }));
 
+applySettingsFromAddress();
 writeChecks();
 compute();
 drawSwarm();

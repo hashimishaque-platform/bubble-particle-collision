@@ -1,0 +1,12 @@
+{
+ "tool": "live",
+ "bubbleDiameter_mm": 2.3,
+ "speed_m_s": 0.18,
+ "aspectRatio": 0.5,
+ "gridDiametersUpstream": 6,
+ "particleDiameter_um": 33,
+ "particleDensity_kg_m3": 1050,
+ "steps": 20000,
+ "warmup": 5000,
+ "seed": 1
+}
