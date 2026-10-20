@@ -29,6 +29,11 @@ were used.
   with FFT cross-correlation, a sub-pixel peak fit, a second pass with window offset and the
   normalised median test. Because the exact flow is known, every PIV vector can be checked, which
   shows where PIV next to a bubble surface stops being reliable.
+- Draws a cut through a bubble swarm in a flotation cell: bubbles that rise at the speed given by
+  the Tomiyama drag correlation, the potential flow each one sets up in the liquid, and synthetic
+  turbulence (kinematic simulation with the Kolmogorov spectrum) for a chosen energy dissipation
+  rate. A file of bubble tracks can be loaded instead of the generated swarm; it is read in the
+  browser only and is not part of the program.
 
 ## Method in short
 
@@ -38,6 +43,7 @@ were used.
 | Drag | From the surface vorticity and its normal derivative. |
 | Particles | Maxey-Riley equation without the history and lift forces, added-mass coefficient 1/2. Fourth-order Runge-Kutta, or an exponential integrator below a Stokes number of 0.02, where the equation is stiff. |
 | Collision efficiency | Exact from the particle stream function for particles without inertia; bisection on trajectories that start 8 bubble radii upstream for particles with inertia. |
+| Bubble swarm | Rise speed from Tomiyama et al. (1998), shape from Wellek et al. (1966). Each bubble is a potential-flow dipole of its volume-equivalent sphere; the fields are added. Turbulence: 200 random Fourier modes, frozen in time (Fung et al. 1992). |
 | Synthetic PIV | Gaussian particle images integrated over the pixels, with background, noise and 8-bit quantisation. 32 px windows at 50 % overlap by default. |
 
 ## Checks
@@ -78,6 +84,14 @@ about three minutes.
 | With inertia: 30 µm quartz, 1.0 mm bubble with frother (Re = 111.8, Stokes number 0.035), exponential integrator against Runge-Kutta | 0.01346 | 0.01346 |  | Same flow; difference −0.02 % |
 | **Synthetic PIV** | | | | |
 | Uniform shift of 2.3 and −1.7 pixels, 32 px windows: random error of one displacement component | about 0.05 px or less | 0.037 px |  | Typical for 32 px windows: Raffel et al. (2018) |
+| **Bubble swarm and synthetic turbulence** | | | | |
+| One bubble: normal velocity at the surface minus the bubble's, largest of 400 points | 0 | 3.0 × 10<sup>−9</sup> |  | Kinematic surface condition (Batchelor 1967) |
+| One bubble: divergence relative to the largest velocity gradient | 0 | 6.5 × 10<sup>−10</sup> |  | Incompressible liquid |
+| Turbulence, 1 W/kg, L = 20 mm: mean kinetic energy over 40 000 points / sum of E(k) dk | 1 | 0.9991 |  | Fung et al. (1992) |
+| Turbulence: sum of E(k) dk / integral of the Kolmogorov spectrum | 1 | 1.000004 |  | Exact integral |
+| Turbulence: divergence relative to the largest velocity gradient | 0 | 1.5 × 10<sup>−8</sup> |  | Modes perpendicular to their wave vectors |
+| Rise speed of a 0.1 mm bubble, Tomiyama (fully contaminated) / Schiller-Naumann | 1 | 1.000000 |  | Low Re limit |
+| Rise speed of a 10 mm bubble, slightly contaminated (m/s) | 0.2521 | 0.2521 |  | Shape branch of Tomiyama et al., closed form |
 
 ## Files
 
@@ -86,6 +100,7 @@ about three minutes.
 | `index.html` | The program, built from the files below |
 | `flow.js` | Flow solver, particle motion and collision efficiency |
 | `piv.js` | Synthetic PIV images and their evaluation |
+| `swarm.js` | Bubble swarm: rise speed, shape, the flow around each bubble, synthetic turbulence and the tracks-file reader |
 | `template.html` | The page around the code: text, figures and form |
 | `checks.js`, `checks.json` | The checks and their results |
 | `build.py` | Puts the page together, with its title, description and preview tags: `python3 build.py` |
@@ -101,6 +116,8 @@ newer.
 - The surface is either fully immobile or fully mobile.
 - Collision only, not attachment: no film drainage, no surface forces. The particle does not
   disturb the flow.
+- The swarm figure is kinematic: potential flow around each bubble (no wakes), fields simply
+  added, and frozen synthetic turbulence that does not interact with the bubbles.
 - The PIV images are idealised: motion in the light sheet only, no reflections at the bubble.
 
 ## References
@@ -108,7 +125,8 @@ newer.
 The page lists all references. The main ones are Clift, Grace and Weber, *Bubbles, Drops, and
 Particles* (1978); Johnson and Patel, J. Fluid Mech. 378 (1999) 19; Mei, Klausner and Lawrence,
 Phys. Fluids 6 (1994) 418; Maxey and Riley, Phys. Fluids 26 (1983) 883; Weber and Paddock,
-J. Colloid Interface Sci. 94 (1983) 328; Dai, Fornasiero and Ralston, Adv. Colloid Interface
+J. Colloid Interface Sci. 94 (1983) 328; Tomiyama et al., JSME Int. J. Ser. B 41 (1998) 472;
+Fung et al., J. Fluid Mech. 236 (1992) 281; Dai, Fornasiero and Ralston, Adv. Colloid Interface
 Sci. 85 (2000) 231; Raffel et al., *Particle Image Velocimetry* (2018); Westerweel and Scarano,
 Exp. Fluids 39 (2005) 1096.
 
