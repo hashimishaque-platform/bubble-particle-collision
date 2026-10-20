@@ -32,8 +32,10 @@ were used.
 - Draws a cut through a bubble swarm in a flotation cell: bubbles that rise at the speed given by
   the Tomiyama drag correlation, the potential flow each one sets up in the liquid, and synthetic
   turbulence (kinematic simulation with the Kolmogorov spectrum) for a chosen energy dissipation
-  rate. A file of bubble tracks can be loaded instead of the generated swarm; it is read in the
-  browser only and is not part of the program.
+  rate. The bubbles can be a random swarm or a chain above one needle, with a chosen surface
+  tension, and a Play button lets them rise. A file of bubble tracks can be loaded instead of the
+  generated swarm; it is read in the browser only and is not part of the program. The page then
+  plays its time steps and compares each track's size, rise speed and shape with the correlations.
 
 ## Method in short
 
@@ -92,6 +94,9 @@ about three minutes.
 | Turbulence: divergence relative to the largest velocity gradient | 0 | 1.5 × 10<sup>−8</sup> |  | Modes perpendicular to their wave vectors |
 | Rise speed of a 0.1 mm bubble, Tomiyama (fully contaminated) / Schiller-Naumann | 1 | 1.000000 |  | Low Re limit |
 | Rise speed of a 10 mm bubble, slightly contaminated (m/s) | 0.2521 | 0.2521 |  | Shape branch of Tomiyama et al., closed form |
+| Rise speed of a 2.3 mm bubble at 29.7 mN/m, fully contaminated (m/s) | 0.1927 | 0.1927 |  | Shape branch, closed form |
+| Tracks made by the program at 0.5 ms per step: estimated time step (ms) | 0.5 | 0.500000 |  | Exact at constant speed |
+| Same tracks: mean rise speed and diameter of one track | 0.2510 m/s, 2.500 mm | 0.2510 m/s, 2.500 mm |  | Values used to make the tracks |
 
 ## Files
 

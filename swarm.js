@@ -23,8 +23,8 @@ function swRandom(seed) {
 }
 
 // ---------- single bubble: drag, rise speed and shape ----------
-// Eotvos number with the volume-equivalent diameter d.
-const eotvos = (d) => SW.g * (SW.rhoL - SW.rhoG) * d * d / SW.sigma;
+// Eotvos number with the volume-equivalent diameter d; sigma in N/m, water if not given.
+const eotvos = (d, sigma) => SW.g * (SW.rhoL - SW.rhoG) * d * d / (sigma || SW.sigma);
 // Drag coefficient of Tomiyama, Kataoka, Zun and Sakaguchi (1998) for a pure, slightly or fully contaminated system.
 function cdTomiyama(Re, Eo, sys) {
   const shape = 8 / 3 * Eo / (Eo + 4);
@@ -34,9 +34,9 @@ function cdTomiyama(Re, Eo, sys) {
   return Math.max(Math.min(24 / Re * sn, 72 / Re), shape);    // slightly contaminated
 }
 // Terminal rise speed from the force balance (rhoL - rhoG) g pi d^3 / 6 = Cd rhoL U^2 pi d^2 / 8, by bisection.
-function riseVelocity(d, sys, mu) {
+function riseVelocity(d, sys, mu, sigma) {
   mu = mu || SW.mu;
-  const Eo = eotvos(d);
+  const Eo = eotvos(d, sigma);
   const F = (U) => U * U - 4 * (SW.rhoL - SW.rhoG) * SW.g * d / (3 * cdTomiyama(SW.rhoL * U * d / mu, Eo, sys) * SW.rhoL);
   let lo = 1e-9, hi = 10;
   for (let i = 0; i < 200; i++) { const m = Math.sqrt(lo * hi); if (F(m) > 0) hi = m; else lo = m; }
@@ -53,14 +53,19 @@ function semiAxes(d, E) {
 // ---------- the swarm ----------
 // A bubble: x, y, z (mm, y upwards), velocity vx, vy, vz (m/s), semi-axes a (horizontal) and c (vertical) in mm,
 // tilt alpha in degrees (rotation of the a axis from the x axis towards y).
-// makeSwarm places n bubbles of diameter d (m) at random in a box (mm) without overlap; each rises at its terminal speed.
+// makeSwarm places n bubbles of diameter d (m) at random in a box (mm) without overlap, or, with o.chain, in a
+// vertical line at x = z = 0 spaced o.spacing mm apart, as above a single needle. Each rises at its terminal speed.
 function makeSwarm(o) {
   const rand = swRandom(o.seed || 1);
-  const d = o.d, U = riseVelocity(d, o.sys), Eo = eotvos(d), E = aspectWellek(Eo), ax = semiAxes(d, E);
+  const d = o.d, U = riseVelocity(d, o.sys, SW.mu, o.sigma), Eo = eotvos(d, o.sigma), E = aspectWellek(Eo), ax = semiAxes(d, E);
   const aMm = ax.a * 1e3, cMm = ax.c * 1e3;
   const [Lx, Ly, Lz] = o.box;
   const out = [];
-  for (let tries = 0; out.length < o.n && tries < 200 * o.n; tries++) {
+  if (o.chain) {
+    const sp = Math.max(o.spacing, 2.1 * cMm);
+    for (let y = -Ly / 2 + sp / 2; y < Ly / 2 && out.length < o.n; y += sp) out.push({ id: out.length + 1, x: 0, y, z: 0, vx: 0, vy: U, vz: 0, a: aMm, c: cMm, alpha: 0 });
+  }
+  for (let tries = 0; !o.chain && out.length < o.n && tries < 200 * o.n; tries++) {
     const b = { id: out.length + 1, x: (rand() - 0.5) * Lx, y: (rand() - 0.5) * Ly, z: (rand() - 0.5) * Lz, vx: 0, vy: U, vz: 0, a: aMm, c: cMm, alpha: 0 };
     if (out.every((q) => Math.hypot(q.x - b.x, q.y - b.y, q.z - b.z) > 2.1 * aMm)) out.push(b);
   }
@@ -134,6 +139,16 @@ function turbulentFlow(T, x, y, z) {
   return [ux, uy, uz];
 }
 
+// Positions after a time t (s): every bubble moves with its velocity, and the box is periodic in y,
+// so a bubble that leaves at the top comes back at the bottom.
+function advanceSwarm(bubbles, t, Ly) {
+  return bubbles.map((b) => {
+    let y = b.y + b.vy * t * 1e3;
+    y = ((y + Ly / 2) % Ly + Ly) % Ly - Ly / 2;
+    return Object.assign({}, b, { x: b.x + b.vx * t * 1e3, y, z: b.z + b.vz * t * 1e3 });
+  });
+}
+
 // ---------- tracks file ----------
 // CSV with a header line and the columns TimeStep, ID, X, Y, Z, VX, VY, VZ, a, c, alpha
 // (positions and semi-axes in mm, velocities in m/s, alpha in degrees). Other columns are ignored.
@@ -164,6 +179,33 @@ function parseTracks(text) {
   return { steps, keys, bad, rows: lines.length - 1 - bad };
 }
 
+// Tracks of a parsed file, one per ID, sorted by time step.
+function tracksById(T) {
+  const m = new Map();
+  for (const k of T.keys) for (const b of T.steps.get(k)) { if (!m.has(b.id)) m.set(b.id, []); m.get(b.id).push(b); }
+  return m;
+}
+// Time between two time steps (s), estimated from the data: vertical distance moved per step divided by the
+// vertical velocity, median over all pairs of consecutive points of all tracks.
+function trackTimeStep(tracks) {
+  const r = [];
+  for (const pts of tracks.values()) for (let i = 1; i < pts.length; i++) {
+    const ds = pts[i].step - pts[i - 1].step, v = 0.5 * (pts[i].vy + pts[i - 1].vy);
+    if (ds > 0 && Math.abs(v) > 1e-6) r.push((pts[i].y - pts[i - 1].y) * 1e-3 / ds / v);
+  }
+  r.sort((p, q) => p - q);
+  return r.length ? r[Math.floor(r.length / 2)] : NaN;
+}
+// Statistics of one track: mean equivalent diameter (m), mean rise velocity (m/s), mean aspect ratio c/a,
+// and the rms of the horizontal velocity about its mean (m/s).
+function trackStats(pts) {
+  const n = pts.length, mean = (f) => pts.reduce((s, b) => s + f(b), 0) / n;
+  const d = mean((b) => 2 * eqRadiusMm(b)) * 1e-3, U = mean((b) => b.vy), E = mean((b) => b.c / b.a);
+  const vx0 = mean((b) => b.vx), vz0 = mean((b) => b.vz);
+  const vh = Math.sqrt(mean((b) => (b.vx - vx0) ** 2 + (b.vz - vz0) ** 2));
+  return { n, d, U, E, vh };
+}
+
 if (typeof module !== 'undefined') {
-  module.exports = { SW, swRandom, eotvos, cdTomiyama, riseVelocity, aspectWellek, semiAxes, makeSwarm, insideBubble, eqRadiusMm, bubbleFlow, kolmogorovScale, spectrum, makeTurbulence, turbulentFlow, parseTracks };
+  module.exports = { SW, swRandom, eotvos, cdTomiyama, riseVelocity, aspectWellek, semiAxes, makeSwarm, insideBubble, eqRadiusMm, bubbleFlow, kolmogorovScale, spectrum, makeTurbulence, turbulentFlow, parseTracks, advanceSwarm, tracksById, trackTimeStep, trackStats };
 }
