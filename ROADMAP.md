@@ -5,7 +5,8 @@ Each step is developed on its own branch and merged into `main` once the checks 
 The project stays theoretical: no measured data and no data from any research centre.
 
 ## Responsiveness
-- [ ] Run the flow solver in a Web Worker so the page stays responsive, with results identical to the current ones.
+- [x] Run the flow solver in a Web Worker so the page stays responsive, with results identical to the current ones. (2026-10-20)
+  The worker runs the same iterations in the same order as the page did, so the results are identical; without workers the page falls back to the old way.
 - [ ] Show the solver progress in Figure 1 while it runs.
 
 ## Generalised Sutherland equation
@@ -27,7 +28,8 @@ The project stays theoretical: no measured data and no data from any research ce
 ## PIV
 - [ ] Window deformation as a third pass, and a comparison of the errors near the surface with the present method.
 - [ ] Out-of-plane loss of particle pairs for a light sheet of finite thickness.
-- [ ] Download the PIV vectors and the exact field as CSV files.
+- [x] Download the PIV vectors and the exact field as CSV files. (2026-10-20)
+  Done together with downloads for every figure, links that hold the settings, and `cli.js` for batch runs.
 
 ## Bubble swarm
 - [x] Cut through a bubble swarm in turbulent liquid: rise speed and shape from published correlations, the potential flow around each bubble, kinematic-simulation turbulence, and a reader for bubble tracks files that stay in the browser. (2026-10-20)
@@ -38,4 +40,6 @@ The project stays theoretical: no measured data and no data from any research ce
 - [ ] Turbulence that changes in time, with the mode frequencies of Fung et al. (1992), and an animation of the swarm.
 
 ## Documentation
-- [ ] `docs/numerics.md`: grid, deferred correction, boundary conditions and a grid-convergence table.
+- [x] `docs/numerics.md`: grid, deferred correction, boundary conditions and a grid-convergence table. (2026-10-20)
+- [x] Research use: citation file, checks on every change, range of validity on the page, contributing guide, tutorials and a draft software paper. (2026-10-20)
+- [ ] Switch on the Zenodo archive and publish release 1.0.0, then add the DOI to the page and `CITATION.cff`.
