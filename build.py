@@ -87,6 +87,7 @@ def head(meta, extra=()):
 
 
 EXTRA = ()
+VERSION = '1.0.0'
 
 
 def module(name):
@@ -101,12 +102,14 @@ def build(home, full):
     page = (here / 'template.html').read_text(encoding='utf-8')
     checks = json.loads((here / 'checks.json').read_text(encoding='utf-8'))
     page = page.replace('/*FLOW*/', module('flow.js'))
+    page = page.replace('/*FLOWSRC*/', json.dumps(module('flow.js')).replace('</', '<\\/'))
     page = page.replace('/*PIV*/', module('piv.js'))
     page = page.replace('/*SWARM*/', module('swarm.js'))
     page = page.replace('/*LBM*/', module('lbm.js'))
     page = page.replace('/*CHECKS*/', json.dumps(checks, ensure_ascii=False))
     if not home.startswith('http'):
         page = page.replace('href="/*HOME*/" target="_blank" rel="noopener"', f'href="{home}"')
+    page = page.replace('/*VERSION*/', VERSION)
     page = page.replace('/*HOME*/', home)
     left = re.findall(r'/\*[A-Z]+\*/', page)
     assert not left, f'placeholders left: {left}'

@@ -1,5 +1,7 @@
 # Bubble and particle collision
 
+[![checks](https://github.com/hashimishaque-platform/bubble-particle-collision/actions/workflows/checks.yml/badge.svg)](https://github.com/hashimishaque-platform/bubble-particle-collision/actions/workflows/checks.yml)
+
 The flow around a rising bubble, the particles that hit it, and synthetic PIV of the same flow,
 for flotation. The program solves the Navier-Stokes equations around the bubble, follows particles
 with the Maxey-Riley equation and computes the collision efficiency. It is a single-page browser
@@ -41,6 +43,34 @@ were used.
   held in place, with an optional grid of rods upstream that makes the oncoming flow turbulent.
   It shows the shed eddies, averages the turbulent kinetic energy and dissipation rate around the
   bubble, and counts where particles hit it, on the front or in the turbulent wake at the rear.
+
+## Using it for research
+
+- **Data out.** Every figure has a download button: CSV for curves and fields, JSON for the
+  settings and results. Each file records the program version and the settings used.
+- **Shareable cases.** "Link to these settings" puts every input into the web address, so a
+  link reproduces the case. Sections have their own addresses: `#piv`, `#swarm`, `#live-flow`,
+  `#model`, `#validity`.
+- **Batch runs.** `node cli.js case.json --csv result.csv` runs the same code without a browser;
+  see [docs/cli.md](docs/cli.md) and the case files in `examples/`.
+- **Range of validity.** The page lists the range of each model and what was checked; the
+  numerical methods and grid-convergence data are in [docs/numerics.md](docs/numerics.md).
+- **Tutorials.** [Collision efficiency of quartz](docs/tutorials/01-collision-efficiency.md),
+  [turbulence behind a bubble](docs/tutorials/02-turbulence-behind-a-bubble.md),
+  [rise speed, shape and tracks files](docs/tutorials/03-rise-speed-and-tracks.md).
+- **Checks on every change.** The workflow in `.github/workflows/checks.yml` runs `checks.js`
+  and the command-line examples, rebuilds the page and fails if the committed results are not
+  reproduced.
+
+## How to cite
+
+Use the "Cite this repository" box on the GitHub page, which reads `CITATION.cff`. Each
+release is archived with its own DOI on Zenodo once the archive is switched on for this
+repository. Please give the version you used; the page shows it at the bottom.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). New models need a source and a check.
 
 ## Method in short
 
@@ -119,6 +149,10 @@ about three minutes.
 | `swarm.js` | Bubble swarm: rise speed, shape, the flow around each bubble, synthetic turbulence and the tracks-file reader |
 | `template.html` | The page around the code: text, figures and form |
 | `checks.js`, `checks.json` | The checks and their results |
+| `cli.js`, `examples/` | Batch runs from a case file, and example cases |
+| `docs/` | Numerical methods, command-line use and tutorials |
+| `paper/` | Draft of a short software paper |
+| `CITATION.cff`, `.zenodo.json` | Citation data |
 | `build.py` | Puts the page together, with its title, description and preview tags: `python3 build.py` |
 | `screenshot.png`, `social.png` | Screenshot for this README, and the preview image shown when the page is shared |
 

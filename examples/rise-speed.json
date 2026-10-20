@@ -1,0 +1,5 @@
+{
+ "tool": "rise",
+ "bubbleDiameter_mm": [0.5, 1, 1.5, 2, 2.5, 3, 4],
+ "surfaceTension_mN_m": [72.75, 50, 30]
+}
