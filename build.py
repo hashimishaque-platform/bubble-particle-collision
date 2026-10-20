@@ -103,6 +103,7 @@ def build(home, full):
     page = page.replace('/*FLOW*/', module('flow.js'))
     page = page.replace('/*PIV*/', module('piv.js'))
     page = page.replace('/*SWARM*/', module('swarm.js'))
+    page = page.replace('/*LBM*/', module('lbm.js'))
     page = page.replace('/*CHECKS*/', json.dumps(checks, ensure_ascii=False))
     if not home.startswith('http'):
         page = page.replace('href="/*HOME*/" target="_blank" rel="noopener"', f'href="{home}"')
