@@ -37,6 +37,11 @@ were used.
   generated swarm; it is read in the browser only and is not part of the program. The page then
   plays its time steps and compares each track's size, rise speed and shape with the correlations.
 
+- Runs a live two-dimensional flow simulation (lattice Boltzmann) of liquid streaming past a bubble
+  held in place, with an optional grid of rods upstream that makes the oncoming flow turbulent.
+  It shows the shed eddies, averages the turbulent kinetic energy and dissipation rate around the
+  bubble, and counts where particles hit it, on the front or in the turbulent wake at the rear.
+
 ## Method in short
 
 | Part | Method |
@@ -46,6 +51,7 @@ were used.
 | Particles | Maxey-Riley equation without the history and lift forces, added-mass coefficient 1/2. Fourth-order Runge-Kutta, or an exponential integrator below a Stokes number of 0.02, where the equation is stiff. |
 | Collision efficiency | Exact from the particle stream function for particles without inertia; bisection on trajectories that start 8 bubble radii upstream for particles with inertia. |
 | Bubble swarm | Rise speed from Tomiyama et al. (1998), shape from Wellek et al. (1966). Each bubble is a potential-flow dipole of its volume-equivalent sphere; the fields are added. Turbulence: 200 random Fourier modes, frozen in time (Fung et al. 1992). |
+| Live flow simulation | D2Q9 lattice Boltzmann, two relaxation times, Smagorinsky subgrid model, Zou-He inlet, damping layer before the outlet; 20 cells per bubble diameter. |
 | Synthetic PIV | Gaussian particle images integrated over the pixels, with background, noise and 8-bit quantisation. 32 px windows at 50 % overlap by default. |
 
 ## Checks
@@ -97,6 +103,10 @@ about three minutes.
 | Rise speed of a 2.3 mm bubble at 29.7 mN/m, fully contaminated (m/s) | 0.1927 | 0.1927 |  | Shape branch, closed form |
 | Tracks made by the program at 0.5 ms per step: estimated time step (ms) | 0.5 | 0.500000 |  | Exact at constant speed |
 | Same tracks: mean rise speed and diameter of one track | 0.2510 m/s, 2.500 mm | 0.2510 m/s, 2.500 mm |  | Values used to make the tracks |
+| **Live flow simulation (lattice Boltzmann)** | | | | |
+| Decaying Taylor-Green vortex, 64 × 64 cells, 500 steps: amplitude / exp(−2νk²t) | 1 | 0.9989 |  | Taylor and Green (1937) |
+| Cylinder in a channel at Re = 100, 20 cells per diameter: Strouhal number | 0.295 to 0.305 | 0.2985 |  | Schäfer and Turek (1996), benchmark 2D-2 |
+| Particle released at rest in a uniform stream: velocity after 3 response times / (1 − e<sup>−3</sup>) | 1 | 1.000000 |  | Exact for Stokes drag |
 
 ## Files
 
@@ -105,6 +115,7 @@ about three minutes.
 | `index.html` | The program, built from the files below |
 | `flow.js` | Flow solver, particle motion and collision efficiency |
 | `piv.js` | Synthetic PIV images and their evaluation |
+| `lbm.js` | Live flow simulation: lattice Boltzmann solver, particles and turbulence statistics |
 | `swarm.js` | Bubble swarm: rise speed, shape, the flow around each bubble, synthetic turbulence and the tracks-file reader |
 | `template.html` | The page around the code: text, figures and form |
 | `checks.js`, `checks.json` | The checks and their results |
@@ -123,6 +134,8 @@ newer.
   disturb the flow.
 - The swarm figure is kinematic: potential flow around each bubble (no wakes), fields simply
   added, and frozen synthetic turbulence that does not interact with the bubbles.
+- The live simulation is two-dimensional (an elliptic cylinder, not a bubble), with an immobile
+  surface and a coarse grid; it shows mechanisms, not numbers for a real cell.
 - The PIV images are idealised: motion in the light sheet only, no reflections at the bubble.
 
 ## References
