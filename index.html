@@ -373,7 +373,7 @@ the notes below.
           <tr><td><label for="lbe">Aspect ratio</label></td><td><select id="lbe"><option value="1">1 (round)</option><option value="0.75">0.75</option><option value="0.5" selected>0.5 (flat)</option></select></td></tr>
           <tr><td><label for="lbg">Grid of rods</label></td><td><select id="lbg"><option value="0">none</option><option value="3">3 diameters upstream</option><option value="6" selected>6 diameters upstream</option><option value="8">8 diameters upstream</option></select></td></tr>
         </table>
-        <p class="small" style="margin:6px 0 0">Water at 20 °C. The flat bubble lies across the flow.</p>
+        <p class="small" style="margin:6px 0 0">Water at 20 °C, speeds from 0.01 to 0.5 m/s. The flat bubble lies across the flow. The bubble is drawn in its own frame: the liquid streams past it at the speed it would rise at, or it is held on a needle in a channel.</p>
       </fieldset>
       <fieldset>
         <legend>Particles</legend>
@@ -2872,6 +2872,13 @@ const lbState = { s: null, playing: false, parts: [], hits: [], probe: [], key: 
 function lbInputs() {
   const d = clamp(num('lbd', 2.3), 0.5, 5) * 1e-3, U = clamp(num('lbu', 0.18), 0.01, 0.5);
   const dp = clamp(num('lbdp', 33), 1, 500) * 1e-6, rhop = clamp(num('lbrp', 1050), 900, 20000);
+  // values outside the range are limited; the form shows what is used, and the status line says so
+  const limited = [];
+  if (Math.abs(U - num('lbu', 0.18)) > 1e-12) { limited.push(`speed ${num('lbu', 0.18)} m/s to ${U} m/s`); $('lbu').value = U; }
+  if (Math.abs(d * 1e3 - num('lbd', 2.3)) > 1e-9) { limited.push(`bubble diameter to ${+(d * 1e3).toFixed(3)} mm`); $('lbd').value = +(d * 1e3).toFixed(3); }
+  if (Math.abs(dp * 1e6 - num('lbdp', 33)) > 1e-9) { limited.push(`particle diameter to ${+(dp * 1e6).toFixed(1)} µm`); $('lbdp').value = +(dp * 1e6).toFixed(1); }
+  if (rhop !== num('lbrp', 1050)) { limited.push(`particle density to ${rhop} kg/m³`); $('lbrp').value = rhop; }
+  if (limited.length) $('lbstatus').textContent = `Limited the ${limited.join(', the ')}. The simulation covers liquid speeds of 0.01 to 0.5 m/s past the bubble, which includes the rise speeds of millimetre bubbles.`;
   const nuW = MU / RHO_L;
   return { d, U, Re: U * d / nuW, E: parseFloat($('lbe').value), grid: parseFloat($('lbg').value), dp, rhop, show: $('lbshow').value, spf: parseInt($('lbspf').value, 10) };
 }
