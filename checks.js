@@ -1,7 +1,7 @@
 // Runs every check shown on the page and writes checks.json. Usage: node checks.js
 // Theoretical checks only: the expected values are exact solutions or published equations and correlations.
 'use strict';
-const F = require('./flow.js'), P = require('./piv.js');
+const F = require('./flow.js'), P = require('./piv.js'), S = require('./swarm.js');
 const fs = require('fs');
 const rows = [];
 const add = (group, label, expected, normal, fine, source) => {
@@ -105,6 +105,48 @@ for (const surf of ['rigid', 'free']) {
   let s = 0, n = 0;
   for (let k = 0; k < r.nx * r.ny; k++) { if (!r.valid[k]) continue; s += (r.U[k] - dx) ** 2 + (r.V[k] - dy) ** 2; n++; }
   add('Synthetic PIV', 'Uniform shift of 2.3 and −1.7 pixels, 32 px windows: random error of one displacement component', 'about 0.05 px or less', fx(Math.sqrt(s / n / 2), 3) + ' px', '', 'Typical for 32 px windows: Raffel et al. (2018)');
+}
+
+// ---- bubble swarm and turbulence ----
+{
+  const G = 'Bubble swarm and synthetic turbulence';
+  const rand = S.swRandom(11);
+  // a spherical bubble of radius 1 mm moving with (0.05, 0.3, -0.02) m/s
+  const b = { x: 0, y: 0, z: 0, vx: 0.05, vy: 0.3, vz: -0.02, a: 1, c: 1, alpha: 0 };
+  let eBC = 0, eDiv = 0, gMax = 0;
+  const h = 1e-5;
+  for (let i = 0; i < 400; i++) {
+    const zz = 2 * rand() - 1, ph = 2 * Math.PI * rand(), sq = Math.sqrt(1 - zz * zz), n = [sq * Math.cos(ph), sq * Math.sin(ph), zz];
+    const r = 1 + 1e-9, u = S.bubbleFlow([b], r * n[0], r * n[1], r * n[2]);
+    const un = u[0] * n[0] + u[1] * n[1] + u[2] * n[2], Un = b.vx * n[0] + b.vy * n[1] + b.vz * n[2];
+    eBC = Math.max(eBC, Math.abs(un - Un) / Math.hypot(b.vx, b.vy, b.vz));
+    const R = 1.2 + 3 * rand(), x = R * n[0], y = R * n[1], z = R * n[2], f = (p, q, w) => S.bubbleFlow([b], p, q, w);
+    const dudx = (f(x + h, y, z)[0] - f(x - h, y, z)[0]) / (2 * h);
+    const div = dudx + (f(x, y + h, z)[1] - f(x, y - h, z)[1]) / (2 * h) + (f(x, y, z + h)[2] - f(x, y, z - h)[2]) / (2 * h);
+    eDiv = Math.max(eDiv, Math.abs(div)); gMax = Math.max(gMax, Math.abs(dudx));
+  }
+  add(G, 'Flow around one bubble: velocity normal to the surface minus the bubble velocity normal to it, largest of 400 points, relative to the bubble speed', '0', sci(eBC + 1e-16, 1), '', 'Kinematic condition at the surface, exact for the dipole field (Batchelor 1967)');
+  add(G, 'Flow around one bubble: divergence, largest of 400 points, relative to the largest velocity gradient', '0 (round-off)', sci(eDiv / gMax, 1), '', 'Incompressible liquid');
+  // turbulence at 1 W/kg, L = 20 mm, eddies down to 2 mm
+  const T = S.makeTurbulence({ eps: 1, L: 0.02, kmax: 1 / 0.2e-3, modes: 200, seed: 5 });
+  let e = 0, dMax = 0, gM = 0;
+  const N = 40000, hh = 1e-7;
+  for (let i = 0; i < N; i++) { const u = S.turbulentFlow(T, rand() * 0.4, rand() * 0.4, rand() * 0.4); e += 0.5 * (u[0] ** 2 + u[1] ** 2 + u[2] ** 2); }
+  for (let i = 0; i < 100; i++) {
+    const x = rand() * 0.02, y = rand() * 0.02, z = rand() * 0.02, f = (p, q, w) => S.turbulentFlow(T, p, q, w);
+    const dudx = (f(x + hh, y, z)[0] - f(x - hh, y, z)[0]) / (2 * hh);
+    const div = dudx + (f(x, y + hh, z)[1] - f(x, y - hh, z)[1]) / (2 * hh) + (f(x, y, z + hh)[2] - f(x, y, z - hh)[2]) / (2 * hh);
+    dMax = Math.max(dMax, Math.abs(div)); gM = Math.max(gM, Math.abs(dudx));
+  }
+  add(G, 'Synthetic turbulence, 1 W/kg, L = 20 mm, 200 modes: mean kinetic energy over 40 000 points divided by the sum of E(k) dk over the modes', '1 (sampling error about 1 %)', fx(e / N / T.energy, 4), '', 'Kinematic simulation, Fung et al. (1992)');
+  add(G, 'Same: sum of E(k) dk over the modes divided by the integral of the Kolmogorov spectrum over the same wavenumbers', '1', fx(T.energy / T.exact, 6), '', 'Band sum against the exact integral');
+  add(G, 'Same: divergence, largest of 100 points, relative to the largest velocity gradient', '0 (round-off)', sci(dMax / gM, 1), '', 'Each mode is perpendicular to its wave vector');
+  // rise speed: small bubble against Schiller-Naumann, large bubble against the shape branch in closed form
+  const d1 = 0.1e-3, u1 = S.riseVelocity(d1, 'full'), u2 = F.terminalVelocity(d1, S.SW.rhoL - S.SW.rhoG, S.SW.rhoL, S.SW.mu, F.cdRigid);
+  add(G, 'Rise speed of a 0.1 mm bubble, fully contaminated (Tomiyama et al. 1998) divided by Schiller and Naumann (1933)', '1', fx(u1 / u2, 6), '', 'Tomiyama et al. reduce to Schiller and Naumann at low Re and Eo');
+  const d2 = 10e-3, Eo = S.eotvos(d2), cd = 8 / 3 * Eo / (Eo + 4), u3 = Math.sqrt(4 * (S.SW.rhoL - S.SW.rhoG) * S.SW.g * d2 / (3 * cd * S.SW.rhoL));
+  add(G, 'Rise speed of a 10 mm bubble (m/s), slightly contaminated', `${fx(u3, 4)} (C<sub>D</sub> = 8 Eo / (3 (Eo + 4)), Eo = ${fx(Eo, 2)})`, fx(S.riseVelocity(d2, 'slight'), 4), '', 'Shape branch of Tomiyama et al. (1998), closed form');
+  if (eBC > 1e-6 || eDiv / gMax > 1e-4 || Math.abs(e / N / T.energy - 1) > 0.03 || dMax / gM > 1e-4 || Math.abs(u1 / u2 - 1) > 1e-6) { console.error('swarm checks failed'); process.exitCode = 1; }
 }
 
 fs.writeFileSync('checks.json', JSON.stringify(rows, null, 1));
