@@ -213,6 +213,60 @@ not uploaded or stored anywhere.
   </div>
 </div>
 
+<h2>Turbulence around a bubble: live flow simulation</h2>
+<p class="text">
+Figure 5 adds turbulence to the flow around bubbles but does not let the bubbles make any.
+Here the flow is computed instead. The liquid streams past a bubble held in place, as in a
+water channel or in the frame of a rising bubble, and the Navier-Stokes equations are solved
+as the picture runs, with the lattice Boltzmann method. Behind the bubble the flow separates
+and sheds eddies, and a grid of rods upstream can add turbulence to the oncoming flow. The
+program averages the flow over time to give the turbulent kinetic energy and the dissipation
+rate around the bubble, and sends particles past it to see where they hit. The computation is
+two-dimensional (a long body of elliptic cross-section), which is a large simplification; see
+the notes below.
+</p>
+
+<div class="tool">
+  <div class="fig">
+    <canvas id="lbcan" class="piv" width="720" height="280" style="background:#ffffff" aria-label="Live flow past a bubble"></canvas>
+    <p class="caption" id="cap7"></p>
+    <svg id="fig8" class="plot" viewBox="0 0 600 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Turbulence and collisions around the bubble against the angle from the front"></svg>
+    <p class="caption" id="cap8"></p>
+  </div>
+  <div class="side">
+    <form id="lbform" novalidate>
+      <fieldset>
+        <legend>Flow</legend>
+        <table class="form">
+          <tr><td><label for="lbd">Bubble diameter</label></td><td><input type="number" id="lbd" step="0.1" min="0.5" max="5" value="2.3"> mm</td></tr>
+          <tr><td><label for="lbu">Liquid speed</label></td><td><input type="number" id="lbu" step="0.01" min="0.01" max="0.5" value="0.18"> m/s</td></tr>
+          <tr><td><label for="lbe">Aspect ratio</label></td><td><select id="lbe"><option value="1">1 (round)</option><option value="0.75">0.75</option><option value="0.5" selected>0.5 (flat)</option></select></td></tr>
+          <tr><td><label for="lbg">Grid of rods</label></td><td><select id="lbg"><option value="0">none</option><option value="3">3 diameters upstream</option><option value="6" selected>6 diameters upstream</option><option value="8">8 diameters upstream</option></select></td></tr>
+        </table>
+        <p class="small" style="margin:6px 0 0">Water at 20 °C. The flat bubble lies across the flow.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Particles</legend>
+        <table class="form">
+          <tr><td><label for="lbdp">Diameter</label></td><td><input type="number" id="lbdp" step="1" min="1" max="500" value="33"> µm</td></tr>
+          <tr><td><label for="lbrp">Density</label></td><td><input type="number" id="lbrp" step="10" min="900" max="20000" value="1050"> kg/m³</td></tr>
+        </table>
+      </fieldset>
+      <fieldset>
+        <legend>Picture</legend>
+        <table class="form">
+          <tr><td><label for="lbshow">Colour</label></td><td><select id="lbshow"><option value="vort">vorticity, now</option><option value="speed">speed, now</option><option value="tke">turbulent kinetic energy, averaged</option><option value="eps">dissipation rate, averaged</option></select></td></tr>
+          <tr><td><label for="lbspf">Speed</label></td><td><select id="lbspf"><option value="2">slow</option><option value="4" selected>normal</option><option value="8">fast</option></select></td></tr>
+        </table>
+        <p style="margin:8px 0 0"><input type="button" id="lbplay" value="Play"> <input type="button" id="lbrestart" value="Restart"> <input type="button" id="lbreset" value="New averages"></p>
+      </fieldset>
+    </form>
+    <p class="small" id="lbstatus" aria-live="polite"></p>
+    <div class="scroll"><table class="data" id="lbres"></table></div>
+    <div id="lbnotes" class="small"></div>
+  </div>
+</div>
+
 <div class="text">
 
 <h2>How to read the results</h2>
@@ -265,6 +319,18 @@ faster and are flatter than contaminated ones of the same size, so a file whose 
 the curves in (a) and below the curve in (b) behaves like bubbles in clean water. Set the surface
 tension to that of the liquid in the file; a surfactant lowers it and so lowers the rise speed
 of bubbles above about 2 mm.
+</p>
+
+<p>
+In Figure 7 the liquid comes from the left. With the grid switched on, each rod sheds a row of
+small eddies that merge and decay on their way to the bubble, so the bubble meets a turbulent
+stream. Behind the bubble the flow separates, and eddies of both signs are shed in turn. The
+time-averaged pictures show where the turbulence sits: the turbulent kinetic energy and the
+dissipation rate are low in front of the bubble and high in the wake. Figure 8 puts the two
+side by side. Fine particles that follow the liquid mostly hit the front of the bubble, near the
+stagnation point. Some are carried round by the shed eddies and hit the rear, where the
+turbulence is strongest. Press "New averages" after changing the picture settings, and give the
+averages a few shedding periods before reading them.
 </p>
 
 <h2>Model</h2>
@@ -359,6 +425,28 @@ in the bulk of the cell, and near the impeller it is 5 to 200 times higher than 
 (Massey 2011, citing Schubert 2008).
 </p>
 
+<p>
+<b>Live flow simulation.</b> The two-dimensional Navier-Stokes equations are solved with the
+lattice Boltzmann method on a D2Q9 lattice, with 20 cells per bubble diameter and a lattice inflow
+speed of 0.04. The collision uses two relaxation times (Ginzburg, Verhaeghe and d'Humières 2008)
+with the parameter Λ = 1/4; the viscosity follows from the Reynolds number of the chosen bubble
+and speed in water. Above a Reynolds number of a few hundred the grid cannot resolve the thinnest
+shear layers, so a Smagorinsky subgrid viscosity with C = 0.15 is added, computed from the
+non-equilibrium momentum flux (Yu, Girimaji and Luo 2005). The bubble and the rods have no-slip
+surfaces (halfway bounce-back), like a bubble with an immobile surface. The inflow uses the
+velocity condition of Zou and He (1997), the sides are periodic, and a damping layer of rising
+viscosity before the outlet lets eddies leave without reflection. Particles follow the same
+Maxey-Riley equation as above, with the drag treated exactly over each step. The statistics are
+running averages over every fourth step:
+</p>
+<pre>k = ( ⟨u′²⟩ + ⟨v′²⟩ ) / 2                            two velocity components only
+ε = 2ν ( ⟨s_ij s_ij⟩ − S_ij S_ij )                   s: strain rate now, S: of the mean flow</pre>
+<p>
+They are converted to physical units with the bubble diameter d and the speed U: k scales with
+U² and ε with U³/d. The shedding frequency is read from the cross-stream velocity two diameters
+behind the bubble.
+</p>
+
 <h2>Checks</h2>
 <p>
 These numbers come from running this page's code with both grids and a tighter convergence
@@ -384,6 +472,14 @@ fields of nearby bubbles are simply added, which is only right when the bubbles 
 apart. The turbulence does not interact with the bubbles, is frozen in time, and leaves out the
 eddies larger than L and smaller than the grid. Bubbles in a tracks file are drawn as they are
 given; their velocities are taken relative to the liquid at rest.</li>
+<li>The live simulation of Figure 7 is two-dimensional. It describes a long body of elliptic
+cross-section, not a bubble, and two-dimensional turbulence behaves differently from real
+turbulence: energy moves to larger eddies instead of smaller ones, and the shed eddies stay
+strong for longer. The bubble is held still and keeps its shape, its surface is immobile, and
+the particles do not disturb the flow. With 20 cells per diameter, the boundary layer at a
+Reynolds number of several hundred is only a few cells thick, so the separation point and
+the smallest eddies are approximate. The picture shows the mechanisms, front and rear
+collisions and the turbulence in the wake, not numbers for a real cell.</li>
 <li>The PIV images are idealised: two-dimensional motion in the light sheet, no reflections or
 refraction at the bubble surface, tracers that follow the flow exactly.</li>
 </ul>
@@ -414,6 +510,12 @@ refraction at the bubble surface, tracers that follow the flow exactly.</li>
 <li>Fung, J. C. H.; Hunt, J. C. R.; Malik, N. A.; Perkins, R. J. Kinematic simulation of homogeneous turbulence by unsteady random Fourier modes. <i>J. Fluid Mech.</i> 236 (1992) 281 to 318. <a href="https://doi.org/10.1017/S0022112092001423" target="_blank" rel="noopener">doi:10.1017/S0022112092001423</a></li>
 <li>Sreenivasan, K. R. On the universality of the Kolmogorov constant. <i>Phys. Fluids</i> 7 (1995) 2778 to 2784.</li>
 <li>Massey, W. T. Investigating the effect of energy dissipation on flotation kinetics in an oscillating grid flotation cell. MSc thesis, University of Cape Town, 2011. <a href="https://open.uct.ac.za/bitstreams/57216737-9200-4682-8e22-6e2fc2e52121/download" target="_blank" rel="noopener">PDF</a></li>
+<li>Ginzburg, I.; Verhaeghe, F.; d'Humières, D. Two-relaxation-time lattice Boltzmann scheme: about parametrization, velocity, pressure and mixed boundary conditions. <i>Commun. Comput. Phys.</i> 3 (2008) 427.</li>
+<li>Zou, Q.; He, X. On pressure and velocity boundary conditions for the lattice Boltzmann BGK model. <i>Phys. Fluids</i> 9 (1997) 1591.</li>
+<li>Yu, H.; Girimaji, S. S.; Luo, L.-S. DNS and LES of decaying isotropic turbulence with and without frame rotation using lattice Boltzmann method. <i>J. Comput. Phys.</i> 209 (2005) 599 to 616.</li>
+<li>Januszewski, M.; Kostur, M. Sailfish: a flexible multi-GPU implementation of the lattice Boltzmann method. <i>Comput. Phys. Commun.</i> 185 (2014) 2350. <a href="https://arxiv.org/abs/1311.2404" target="_blank" rel="noopener">arXiv:1311.2404</a> (form of the Smagorinsky model used here)</li>
+<li>Schäfer, M.; Turek, S. Benchmark computations of laminar flow around a cylinder. In: <i>Flow Simulation with High-Performance Computers II,</i> Notes on Numerical Fluid Mechanics 52, Vieweg, 1996, 547 to 566. <a href="https://wwwold.mathematik.tu-dortmund.de/~featflow/en/benchmarks/cfdbenchmarking/flow/dfg_benchmark2_re100.html" target="_blank" rel="noopener">benchmark 2D-2</a></li>
+<li>Taylor, G. I.; Green, A. E. Mechanism of the production of small eddies from large ones. <i>Proc. R. Soc. Lond. A</i> 158 (1937) 499 to 521.</li>
 <li>Raffel, M.; Willert, C. E.; Scarano, F.; Kähler, C. J.; Wereley, S. T.; Kompenhans, J. <i>Particle Image Velocimetry: A Practical Guide,</i> 3rd ed. Springer, 2018.</li>
 <li>Westerweel, J.; Dabiri, D.; Gharib, M. The effect of a discrete window offset on the accuracy of cross-correlation analysis of digital PIV recordings. <i>Exp. Fluids</i> 23 (1997) 20 to 28.</li>
 <li>Westerweel, J.; Scarano, F. Universal outlier detection for PIV data. <i>Exp. Fluids</i> 39 (2005) 1096 to 1100.</li>
@@ -434,6 +536,8 @@ refraction at the bubble surface, tracers that follow the flow exactly.</li>
 /*PIV*/
 
 /*SWARM*/
+
+/*LBM*/
 
 const CHECKS = /*CHECKS*/;
 const RHO_L = 998.2, MU = 1.002e-3, SIGMA = 0.0728, RHO_G = 1.2;
@@ -1263,6 +1367,212 @@ function loadTracks(file) {
   rd.readAsText(file);
 }
 
+// ---------- Figure 7 and 8: live lattice Boltzmann simulation ----------
+const LBG = { D: 20, nx: 300, ny: 120, U: 0.04, xb: 180, sponge: 40, Cs: 0.15 };
+const lbState = { s: null, playing: false, parts: [], hits: [], probe: [], key: '', warm: 0, inp: null };
+function lbInputs() {
+  const d = clamp(num('lbd', 2.3), 0.5, 5) * 1e-3, U = clamp(num('lbu', 0.18), 0.01, 0.5);
+  const dp = clamp(num('lbdp', 33), 1, 500) * 1e-6, rhop = clamp(num('lbrp', 1050), 900, 20000);
+  const nuW = MU / RHO_L;
+  return { d, U, Re: U * d / nuW, E: parseFloat($('lbe').value), grid: parseFloat($('lbg').value), dp, rhop, show: $('lbshow').value, spf: parseInt($('lbspf').value, 10) };
+}
+function lbBuild() {
+  const u = lbInputs();
+  const Re = Math.min(u.Re, 1500);
+  const nu = LBG.U * LBG.D / Re;
+  const s = lbCreate(LBG.nx, LBG.ny, { nu, ramp: 1500, smagorinsky: LBG.Cs, sponge: LBG.sponge, uIn: () => LBG.U });
+  // bubble: an ellipse of the same area as the circle of diameter D, its short axis along the flow
+  const R = LBG.D / 2, cx = R * Math.sqrt(u.E), ay = R / Math.sqrt(u.E), yb = LBG.ny / 2 + 0.3;
+  lbAddEllipse(s, LBG.xb, yb, cx, ay);
+  const rods = [];
+  if (u.grid > 0) {
+    const M = 1.25 * LBG.D, dr = LBG.D / 3, xg = LBG.xb - u.grid * LBG.D;
+    for (let y = M / 2; y < LBG.ny; y += M) { lbAddEllipse(s, xg, y, dr / 2, dr / 2); rods.push([xg, y, dr / 2]); }
+  }
+  // particle parameters in lattice units: Maxey-Riley response time and added-mass factor
+  const dpl = u.dp / u.d * LBG.D, ratio = u.rhop / RHO_L;
+  const tp = Math.max(1e-3, (ratio + 0.5) * dpl * dpl / (18 * nu)), beta = 3 / (2 * ratio + 1);
+  Object.assign(lbState, { s, parts: [], hits: [], probe: [], warm: 5000, inp: u, Re, nu, cx, ay, yb, rods, dpl, tp, beta, St: tp * LBG.U / LBG.D });
+  lbStatsReset(s);
+  lbDraw(); lbWrite();
+}
+// particles: kept dense in a band around the bubble's path, entering at the left
+// they start 3 diameters upstream of the bubble, or just behind the grid
+function lbSeed(n) {
+  const L = lbState, band = 1.3 * L.ay, x0 = L.rods.length ? Math.min(L.rods[0][0] + LBG.D, LBG.xb - 3 * LBG.D) : LBG.xb - 3 * LBG.D;
+  for (let i = 0; i < n; i++) {
+    const x = x0 + Math.random(), y = L.yb + (2 * Math.random() - 1) * band;
+    L.parts.push({ x, y, vx: lbInterp(L.s, L.s.ux, x, y), vy: lbInterp(L.s, L.s.uy, x, y) });
+  }
+}
+function lbAdvance(nSteps) {
+  const L = lbState, s = L.s;
+  for (let n = 0; n < nSteps; n++) {
+    lbStep(s);
+    if (s.t > L.warm && s.t % 4 === 0) lbStatsAdd(s);
+    L.probe.push(lbInterp(s, s.uy, LBG.xb + 2 * LBG.D, L.yb));
+    if (L.probe.length > 20000) L.probe.splice(0, L.probe.length - 20000);
+    if (s.t < 1500) continue;
+    lbSeed(1);
+    const ex = L.cx + L.dpl / 2, ey = L.ay + L.dpl / 2;
+    const keep = [];
+    for (const p of L.parts) {
+      lbMoveParticle(s, p, L.beta, L.tp);
+      const dx = (p.x - LBG.xb) / ex, dy = (p.y - L.yb) / ey;
+      if (dx * dx + dy * dy <= 1) {
+        // angle from the front stagnation point, 0 at the front, 180 degrees at the rear
+        L.hits.push(Math.atan2(Math.abs(dy), -dx) * 180 / Math.PI);
+        continue;
+      }
+      let inRod = false;
+      for (const r of L.rods) if ((p.x - r[0]) ** 2 + (p.y - r[1]) ** 2 <= (r[2] + L.dpl / 2) ** 2) { inRod = true; break; }
+      if (!inRod && p.x < LBG.nx - LBG.sponge) keep.push(p);
+    }
+    L.parts = keep;
+  }
+}
+const lbImg = { cv: null };
+function lbDraw() {
+  const L = lbState, s = L.s, u = L.inp, { nx, ny } = s;
+  if (!lbImg.cv) { lbImg.cv = document.createElement('canvas'); lbImg.cv.width = nx; lbImg.cv.height = ny; }
+  const cx = lbImg.cv.getContext('2d'), img = cx.createImageData(nx, ny), D = img.data;
+  let F = null, lim = 1, div = false;
+  if (u.show === 'vort') {
+    F = new Float64Array(s.N);
+    for (let y = 0; y < ny; y++) for (let x = 1; x < nx - 1; x++) {
+      const k = y * nx + x, yp = ((y + 1) % ny) * nx + x, ym = ((y - 1 + ny) % ny) * nx + x;
+      F[k] = (s.uy[k + 1] - s.uy[k - 1]) / 2 - (s.ux[yp] - s.ux[ym]) / 2;
+    }
+    lim = 3 * LBG.U / LBG.D * 2; div = true;
+  } else if (u.show === 'speed') {
+    F = new Float64Array(s.N);
+    for (let k = 0; k < s.N; k++) F[k] = Math.hypot(s.ux[k], s.uy[k]);
+    lim = 1.6 * LBG.U;
+  } else {
+    const st = s.stats && s.stats.n > 2 ? lbStatsFields(s) : null;
+    F = st ? (u.show === 'tke' ? st.K : st.E) : new Float64Array(s.N);
+    const v = Array.from(F).filter((q, k) => !s.solid[k] && q > 0).sort((a, b) => a - b);
+    lim = v.length ? v[Math.floor(0.99 * (v.length - 1))] : NaN;
+    L.lastStats = st;
+  }
+  for (let y = 0; y < ny; y++) for (let x = 0; x < nx; x++) {
+    const k = y * nx + x, o = 4 * k;
+    let c;
+    if (s.solid[k]) c = [255, 255, 255];
+    else if (div) { const t = clamp(F[k] / lim, -1, 1); c = t > 0 ? [255, Math.round(255 - 190 * t), Math.round(255 - 190 * t)] : [Math.round(255 + 205 * t), Math.round(255 + 165 * t), 255]; }
+    else { const t = clamp(F[k] / lim, 0, 1); c = [Math.round(255 - 205 * t), Math.round(255 - 165 * t), 255 - Math.round(35 * t)]; }
+    D[o] = c[0]; D[o + 1] = c[1]; D[o + 2] = c[2]; D[o + 3] = 255;
+  }
+  cx.putImageData(img, 0, 0);
+  const can = $('lbcan'), g = can.getContext('2d'), sc = can.width / nx;
+  g.imageSmoothingEnabled = true;
+  g.drawImage(lbImg.cv, 0, 0, can.width, can.height);
+  // bubble, rods, particles
+  g.strokeStyle = '#000000'; g.fillStyle = '#ffffff'; g.lineWidth = 1.2;
+  g.beginPath(); g.ellipse(LBG.xb * sc, L.yb * sc, L.cx * sc, L.ay * sc, 0, 0, 2 * Math.PI); g.fill(); g.stroke();
+  g.fillStyle = '#808080';
+  for (const r of L.rods) { g.beginPath(); g.arc(r[0] * sc, r[1] * sc, r[2] * sc, 0, 2 * Math.PI); g.fill(); }
+  g.fillStyle = '#000000';
+  for (const p of L.parts) g.fillRect(p.x * sc - 0.6, p.y * sc - 0.6, 1.3, 1.3);
+  g.strokeStyle = '#808080'; g.setLineDash([3, 3]);
+  g.beginPath(); g.moveTo((nx - LBG.sponge) * sc, 0); g.lineTo((nx - LBG.sponge) * sc, can.height); g.stroke(); g.setLineDash([]);
+  // colour bar labels in the caption
+  L.lim = lim;
+}
+function lbShedding() {
+  const p = lbState.probe.slice(-10000), n = p.length;
+  if (n < 3000) return NaN;
+  const m = p.reduce((a, b) => a + b, 0) / n, amp = Math.max(...p.map((q) => Math.abs(q - m)));
+  if (amp < 1e-3 * LBG.U) return NaN;
+  const cr = []; let arm = false;
+  for (let i = 1; i < n; i++) { const a = p[i] - m; if (a < -0.3 * amp) arm = true; if (arm && p[i - 1] - m < 0 && a >= 0) { cr.push(i - 1 + (m - p[i - 1]) / (p[i] - p[i - 1])); arm = false; } }
+  if (cr.length < 3) return NaN;
+  const T = (cr[cr.length - 1] - cr[0]) / (cr.length - 1);
+  return LBG.D / (T * LBG.U);
+}
+function lbWrite() {
+  const L = lbState, s = L.s, u = L.inp;
+  const tPhys = s.t * (u.d / LBG.D) / (u.U / LBG.U);
+  const showTxt = { vort: 'vorticity (red: turning anticlockwise, blue: clockwise)', speed: 'speed of the liquid', tke: 'turbulent kinetic energy, averaged over time', eps: 'dissipation rate of the turbulence, averaged over time' }[u.show];
+  const noAvg = (u.show === 'tke' || u.show === 'eps') && !isFinite(L.lim);
+  const scaleTxt = noAvg ? ` No averages yet: they start after ${L.warm} time steps, when the flow has settled.` : u.show === 'tke' ? ` White to dark blue: 0 to ${fmt(L.lim / (LBG.U * LBG.U) * u.U * u.U, 2)} m²/s².` : u.show === 'eps' ? ` White to dark blue: 0 to ${fmt(L.lim / (LBG.U ** 3 / LBG.D) * u.U ** 3 / u.d, 2)} W/kg.` : u.show === 'speed' ? ` White to dark blue: 0 to ${fmt(1.6 * u.U, 2)} m/s.` : '';
+  $('cap7').innerHTML = `<b>Figure 7.</b> Two-dimensional flow from left to right past a ${fmt(u.d * 1e3, 3)} mm bubble held in place, at ${fmt(u.U, 3)} m/s (Re = ${fmt(L.Re, 3)})${L.rods.length ? `, with a grid of rods ${u.grid} diameters upstream` : ''}. Colour: ${showTxt}.${scaleTxt} Black dots: particles of ${fmt(u.dp * 1e6, 3)} µm; they enter at the left and are removed when they touch the bubble. Dashed line: start of the damping layer before the outlet. t = ${fmt(tPhys * 1e3, 4)} ms.`;
+  const hits = L.hits, front = hits.filter((q) => q < 90).length, rear = hits.length - front;
+  const Sh = lbShedding();
+  const st = L.lastStats || (s.stats && s.stats.n > 2 ? lbStatsFields(s) : null);
+  const probeK = (dx) => { if (!st) return NaN; const k = Math.round(L.yb) * s.nx + Math.round(LBG.xb + dx * LBG.D); return st.K[k] / (LBG.U * LBG.U) * u.U * u.U; };
+  const rows = [
+    ['Reynolds number Re = U d / ν', fmt(u.Re, 3) + (u.Re > 1500 ? ' (computed at 1500, the highest the program allows)' : '')],
+    ['Particle Stokes number St = τ<sub>p</sub> U / d', fmt(L.St, 2)],
+    ['Grid', `${LBG.D} cells per bubble diameter, ${LBG.nx} × ${LBG.ny} cells`],
+    ['Time steps, and time in units of d / U', `${s.t}, ${fmt(s.t * LBG.U / LBG.D, 3)}`],
+    ['Averages taken so far', st ? String(st.n) : `none yet, they start after ${L.warm} steps`],
+    ['Shedding frequency as a Strouhal number f d / U', isFinite(Sh) ? fmt(Sh, 3) : 'not yet steady'],
+    ['Turbulent kinetic energy 1.5 d before and 1.5 d behind the centre', st ? `${fmt(probeK(-1.5), 2)} and ${fmt(probeK(1.5), 2)} m²/s²` : 'n/a'],
+    ['Collisions counted: front half, rear half', `${front}, ${rear}${hits.length ? ` (${fmt(100 * rear / hits.length, 2)} % at the rear)` : ''}`],
+  ];
+  $('lbres').innerHTML = rows.map((q) => `<tr><td>${q[0]}</td><td class="l">${q[1]}</td></tr>`).join('');
+  const notes = [];
+  if (u.Re > 300) notes.push('At this Reynolds number the grid is too coarse to resolve the thinnest shear layers, so the Smagorinsky subgrid model carries part of the dissipation. Treat the fine detail as approximate.');
+  if (L.dpl < 0.3) notes.push(`The particles are ${fmt(L.dpl, 2)} grid cells across, much smaller than a cell, so whether they touch depends on the flow within the last cell above the surface. The counts are a rough guide.`);
+  $('lbnotes').innerHTML = notes.map((q) => `<p>${q}</p>`).join('');
+  lbDrawProfile(st);
+}
+// Figure 8: turbulence on a curve around the bubble, and where particles hit, against the angle from the front
+function lbDrawProfile(st) {
+  const L = lbState, s = L.s, u = L.inp, svg = $('fig8');
+  clear(svg);
+  const P = [{ X0: 52, X1: 290 }, { X0: 352, X1: 590 }], Y0 = 12, Y1 = 280;
+  const ang = []; for (let a = 0; a <= 180; a += 5) ang.push(a);
+  const ring = (a) => { const t = a * Math.PI / 180, r = 1.5; return [LBG.xb - r * L.cx * Math.cos(t), r * L.ay * Math.sin(t)]; };
+  let kv = [], ev = [];
+  if (st) for (const a of ang) {
+    const [x, dy] = ring(a);
+    const val = (F) => 0.5 * (lbInterp(s, F, x, L.yb + dy) + lbInterp(s, F, x, L.yb - dy));
+    kv.push(val(st.K) / (LBG.U * LBG.U)); ev.push(val(st.E) / (LBG.U ** 3 / LBG.D));
+  }
+  const kMax = Math.max(1e-6, ...kv), eMax = Math.max(1e-9, ...ev);
+  for (let p = 0; p < 2; p++) {
+    const { X0, X1 } = P[p];
+    el(svg, 'rect', { x: X0, y: Y0, width: X1 - X0, height: Y1 - Y0, fill: 'none', stroke: '#000000' });
+    for (const a of [0, 45, 90, 135, 180]) { const x = X0 + (X1 - X0) * a / 180; el(svg, 'line', { x1: x, y1: Y1, x2: x, y2: Y1 - 5, stroke: '#000000' }); txt(svg, x, Y1 + 15, String(a), { 'text-anchor': 'middle', 'font-size': 12 }); }
+    txt(svg, (X0 + X1) / 2, Y1 + 32, 'angle from the front of the bubble (°)', { 'text-anchor': 'middle', 'font-size': 13 });
+    txt(svg, X1 - 8, Y1 - 10, p ? '(b)' : '(a)', { 'font-size': 13, 'text-anchor': 'end' });
+  }
+  // (a) k and eps, each scaled to its largest value
+  const xa = (a) => P[0].X0 + (P[0].X1 - P[0].X0) * a / 180, ya = (v) => Y1 - (Y1 - Y0) * v;
+  for (const v of [0, 0.5, 1]) { el(svg, 'line', { x1: P[0].X0, y1: ya(v), x2: P[0].X0 + 5, y2: ya(v), stroke: '#000000' }); txt(svg, P[0].X0 - 5, ya(v) + 4, String(v), { 'text-anchor': 'end', 'font-size': 12 }); }
+  txt(svg, 16, (Y0 + Y1) / 2, 'relative to the largest value', { 'text-anchor': 'middle', 'font-size': 13, transform: `rotate(-90 16 ${(Y0 + Y1) / 2})` });
+  if (st) {
+    el(svg, 'path', { d: ang.map((a, i) => (i ? 'L' : 'M') + xa(a).toFixed(1) + ',' + ya(kv[i] / kMax).toFixed(1)).join(' '), fill: 'none', stroke: '#0000cc', 'stroke-width': 1.4 });
+    el(svg, 'path', { d: ang.map((a, i) => (i ? 'L' : 'M') + xa(a).toFixed(1) + ',' + ya(ev[i] / eMax).toFixed(1)).join(' '), fill: 'none', stroke: '#000000', 'stroke-width': 1.2, 'stroke-dasharray': '6 4' });
+  }
+  el(svg, 'line', { x1: P[0].X0 + 12, y1: Y0 + 30, x2: P[0].X0 + 36, y2: Y0 + 30, stroke: '#0000cc', 'stroke-width': 1.4 });
+  txt(svg, P[0].X0 + 40, Y0 + 34, 'turbulent kinetic energy', { 'font-size': 12 });
+  el(svg, 'line', { x1: P[0].X0 + 12, y1: Y0 + 46, x2: P[0].X0 + 36, y2: Y0 + 46, stroke: '#000000', 'stroke-dasharray': '6 4' });
+  txt(svg, P[0].X0 + 40, Y0 + 50, 'dissipation rate', { 'font-size': 12 });
+  // (b) collisions in 20 degree bins
+  const bins = new Array(9).fill(0);
+  for (const h of L.hits) bins[Math.min(8, Math.floor(h / 20))]++;
+  const n = L.hits.length, bMax = Math.max(0.2, ...bins.map((q) => (n ? q / n : 0)));
+  const xb = (a) => P[1].X0 + (P[1].X1 - P[1].X0) * a / 180, yb = (v) => Y1 - (Y1 - Y0) * v / bMax;
+  for (const v of [0, bMax / 2, bMax]) { el(svg, 'line', { x1: P[1].X0, y1: yb(v), x2: P[1].X0 + 5, y2: yb(v), stroke: '#000000' }); txt(svg, P[1].X0 - 5, yb(v) + 4, fmt(v, 2), { 'text-anchor': 'end', 'font-size': 12 }); }
+  txt(svg, 318, (Y0 + Y1) / 2, 'share of the collisions', { 'text-anchor': 'middle', 'font-size': 13, transform: `rotate(-90 318 ${(Y0 + Y1) / 2})` });
+  bins.forEach((q, i) => { if (!n) return; const v = q / n; el(svg, 'rect', { x: xb(20 * i) + 1, y: yb(v), width: xb(20) - xb(0) - 2, height: Y1 - yb(v), fill: i < 4.5 ? '#cc0000' : '#0000cc', 'fill-opacity': 0.7 }); });
+  $('cap8').innerHTML = `<b>Figure 8.</b> (a) Turbulent kinetic energy (blue) and dissipation rate (dashed) on a curve 1.5 times the bubble's size around its centre, averaged over time and over both sides, each scaled to its largest value${st ? ` (${fmt(kMax * u.U * u.U, 2)} m²/s² and ${fmt(eMax * u.U ** 3 / u.d, 2)} W/kg)` : ''}. (b) Where the ${n} particles counted so far hit the bubble, in bins of 20°: red on the front half, blue on the rear half. 0° is the front stagnation point, 180° the rear.`;
+}
+function lbTick() {
+  if (!lbState.playing) return;
+  lbAdvance(lbState.inp.spf);
+  lbDraw();
+  if (lbState.s.t % 40 < lbState.inp.spf) lbWrite();
+  requestAnimationFrame(lbTick);
+}
+function lbSetPlaying(on) {
+  lbState.playing = on; $('lbplay').value = on ? 'Pause' : 'Play';
+  if (on) requestAnimationFrame(lbTick); else { lbDraw(); lbWrite(); }
+}
+
 // ---------- checks table ----------
 function writeChecks() {
   let html = '<tr><th>Check</th><th>Expected</th><th>Normal grid</th><th>Fine grid</th><th class="l">Source</th></tr>';
@@ -1293,8 +1603,15 @@ $('swplay').addEventListener('click', () => swSetPlaying(!swState.playing));
 $('swback').addEventListener('click', () => { swState.t = 0; $('swstep').value = '0'; drawSwarm(swState.playing); });
 $('swfile').addEventListener('change', () => { const f = $('swfile').files[0]; if (f) { $('swsrc').value = 'file'; loadTracks(f); } });
 
+$('lbplay').addEventListener('click', () => lbSetPlaying(!lbState.playing));
+$('lbrestart').addEventListener('click', () => { lbBuild(); });
+$('lbreset').addEventListener('click', () => { lbStatsReset(lbState.s); lbState.hits = []; lbState.warm = lbState.s.t; lbWrite(); });
+['lbd', 'lbu', 'lbe', 'lbg', 'lbdp', 'lbrp'].forEach((q) => $(q).addEventListener('change', () => { const on = lbState.playing; lbBuild(); if (on) lbSetPlaying(true); }));
+['lbshow', 'lbspf'].forEach((q) => $(q).addEventListener('change', () => { lbState.inp = Object.assign(lbState.inp, { show: $('lbshow').value, spf: parseInt($('lbspf').value, 10) }); lbDraw(); lbWrite(); }));
+
 writeChecks();
 compute();
 drawSwarm();
+lbBuild();
 })();
 </script>
