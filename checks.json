@@ -278,5 +278,29 @@
   "normal": "0.2510 m/s, 2.500 mm",
   "fine": "",
   "source": "Values used to make the tracks"
+ },
+ {
+  "group": "Live flow simulation (lattice Boltzmann)",
+  "label": "Decaying Taylor-Green vortex, 64 × 64 cells, 500 steps: amplitude divided by exp(−2 ν k² t)",
+  "expected": "1",
+  "normal": "0.9989",
+  "fine": "",
+  "source": "Exact solution of the Navier-Stokes equations (Taylor and Green 1937)"
+ },
+ {
+  "group": "Live flow simulation (lattice Boltzmann)",
+  "label": "Cylinder in a channel at Re = 100 (benchmark 2D-2), 20 cells per diameter: Strouhal number of the shedding",
+  "expected": "0.295 to 0.305",
+  "normal": "0.2985",
+  "fine": "",
+  "source": "Schäfer and Turek (1996)"
+ },
+ {
+  "group": "Live flow simulation (lattice Boltzmann)",
+  "label": "Particle released at rest in a uniform stream: velocity after 3 response times divided by 1 − e<sup>−3</sup>",
+  "expected": "1",
+  "normal": "1.000000",
+  "fine": "",
+  "source": "Exact for Stokes drag"
  }
 ]

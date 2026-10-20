@@ -1,7 +1,7 @@
 // Runs every check shown on the page and writes checks.json. Usage: node checks.js
 // Theoretical checks only: the expected values are exact solutions or published equations and correlations.
 'use strict';
-const F = require('./flow.js'), P = require('./piv.js'), S = require('./swarm.js');
+const F = require('./flow.js'), P = require('./piv.js'), S = require('./swarm.js'), LB = require('./lbm.js');
 const fs = require('fs');
 const rows = [];
 const add = (group, label, expected, normal, fine, source) => {
@@ -159,6 +159,37 @@ for (const surf of ['rigid', 'free']) {
   add(G, 'Same tracks: mean rise speed and diameter of one track', `${fx(ch.U, 4)} m/s, 2.500 mm`, `${fx(st.U, 4)} m/s, ${fx(st.d * 1e3, 3)} mm`, '', 'Values used to make the tracks');
   if (Math.abs(u5 / u4 - 1) > 1e-6 || Math.abs(dtEst / 0.5e-3 - 1) > 1e-7 || Math.abs(st.U / ch.U - 1) > 1e-9) { console.error('swarm track checks failed'); process.exitCode = 1; }
   if (eBC > 1e-6 || eDiv / gMax > 1e-4 || Math.abs(e / N / T.energy - 1) > 0.03 || dMax / gM > 1e-4 || Math.abs(u1 / u2 - 1) > 1e-6) { console.error('swarm checks failed'); process.exitCode = 1; }
+}
+
+// ---- live flow simulation (lattice Boltzmann) ----
+{
+  const G = 'Live flow simulation (lattice Boltzmann)';
+  // decaying Taylor-Green vortex, periodic 64 x 64: amplitude after 500 steps against exp(-2 nu k^2 t)
+  const n = 64, nu = 0.02, U0 = 0.02, k = 2 * Math.PI / n, T = 500;
+  const tg = LB.lbCreate(n, n, { nu, periodicX: true, u0: (x, y) => [-U0 * Math.cos(k * x) * Math.sin(k * y), U0 * Math.sin(k * x) * Math.cos(k * y)] });
+  for (let i = 0; i < T; i++) LB.lbStep(tg);
+  let num = 0, den = 0;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const e = -U0 * Math.cos(k * x) * Math.sin(k * y); num += tg.ux[y * n + x] * e; den += e * e; }
+  const tgr = num / den / Math.exp(-2 * nu * k * k * T);
+  add(G, 'Decaying Taylor-Green vortex, 64 × 64 cells, 500 steps: amplitude divided by exp(−2 ν k² t)', '1', fx(tgr, 4), '', 'Exact solution of the Navier-Stokes equations (Taylor and Green 1937)');
+  // DFG benchmark 2D-2 (Schaefer and Turek 1996): cylinder in a channel at Re = 100, D = 20 cells
+  const D = 20, ny = 84, Lx = 440, Um = 0.05, nuc = Um * D / 100;
+  const cy = LB.lbCreate(Lx, ny, { nu: nuc, walls: true, ramp: 3000, uIn: (y) => { const yy = y - 0.5, h = 82; return yy < 0 || yy > h ? 0 : 1.5 * Um * 4 * yy * (h - yy) / (h * h); } });
+  LB.lbAddEllipse(cy, 40.5, 40.5, D / 2, D / 2);
+  const sig = [], pk = 41 * Lx + 100;
+  for (let i = 0; i < 50000; i++) { LB.lbStep(cy); if (i >= 20000) sig.push(cy.uy[pk]); }
+  const sm = sig.map((_, i) => { let a = 0, c = 0; for (let j = Math.max(0, i - 50); j <= Math.min(sig.length - 1, i + 50); j++) { a += sig[j]; c++; } return a / c; });
+  const m = sm.reduce((a, b) => a + b) / sm.length, amp = Math.max(...sm.map((q) => Math.abs(q - m)));
+  const cr = []; let arm = false;
+  for (let i = 1; i < sm.length; i++) { const a = sm[i] - m; if (a < -0.3 * amp) arm = true; if (arm && sm[i - 1] - m < 0 && a >= 0) { cr.push(i - 1 + (m - sm[i - 1]) / (sm[i] - sm[i - 1])); arm = false; } }
+  const Tp = (cr[cr.length - 1] - cr[0]) / (cr.length - 1), St = D / (Tp * Um);
+  add(G, 'Cylinder in a channel at Re = 100 (benchmark 2D-2), 20 cells per diameter: Strouhal number of the shedding', '0.295 to 0.305', fx(St, 4), '', 'Schäfer and Turek (1996)');
+  // particle released at rest in a uniform stream: velocity after 3 response times
+  const uni = LB.lbCreate(40, 20, { nu: 0.05, periodicX: true, u0: () => [0.03, 0] });
+  const pt = { x: 10, y: 10, vx: 0, vy: 0 }, tp = 20;
+  for (let i = 0; i < 60; i++) { LB.lbStep(uni); LB.lbMoveParticle(uni, pt, 0, tp); }
+  add(G, 'Particle released at rest in a uniform stream: velocity after 3 response times divided by 1 − e<sup>−3</sup>', '1', fx(pt.vx / (0.03 * (1 - Math.exp(-3))), 6), '', 'Exact for Stokes drag');
+  if (Math.abs(tgr - 1) > 0.01 || !(St > 0.285 && St < 0.315) || Math.abs(pt.vx / (0.03 * (1 - Math.exp(-3))) - 1) > 1e-6) { console.error('lattice Boltzmann checks failed'); process.exitCode = 1; }
 }
 
 fs.writeFileSync('checks.json', JSON.stringify(rows, null, 1));
