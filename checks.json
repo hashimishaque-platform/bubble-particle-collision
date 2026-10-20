@@ -198,5 +198,61 @@
   "normal": "0.037 px",
   "fine": "",
   "source": "Typical for 32 px windows: Raffel et al. (2018)"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Flow around one bubble: velocity normal to the surface minus the bubble velocity normal to it, largest of 400 points, relative to the bubble speed",
+  "expected": "0",
+  "normal": "3.0 × 10<sup>−9</sup>",
+  "fine": "",
+  "source": "Kinematic condition at the surface, exact for the dipole field (Batchelor 1967)"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Flow around one bubble: divergence, largest of 400 points, relative to the largest velocity gradient",
+  "expected": "0 (round-off)",
+  "normal": "6.5 × 10<sup>−10</sup>",
+  "fine": "",
+  "source": "Incompressible liquid"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Synthetic turbulence, 1 W/kg, L = 20 mm, 200 modes: mean kinetic energy over 40 000 points divided by the sum of E(k) dk over the modes",
+  "expected": "1 (sampling error about 1 %)",
+  "normal": "0.9991",
+  "fine": "",
+  "source": "Kinematic simulation, Fung et al. (1992)"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Same: sum of E(k) dk over the modes divided by the integral of the Kolmogorov spectrum over the same wavenumbers",
+  "expected": "1",
+  "normal": "1.000004",
+  "fine": "",
+  "source": "Band sum against the exact integral"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Same: divergence, largest of 100 points, relative to the largest velocity gradient",
+  "expected": "0 (round-off)",
+  "normal": "1.5 × 10<sup>−8</sup>",
+  "fine": "",
+  "source": "Each mode is perpendicular to its wave vector"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Rise speed of a 0.1 mm bubble, fully contaminated (Tomiyama et al. 1998) divided by Schiller and Naumann (1933)",
+  "expected": "1",
+  "normal": "1.000000",
+  "fine": "",
+  "source": "Tomiyama et al. reduce to Schiller and Naumann at low Re and Eo"
+ },
+ {
+  "group": "Bubble swarm and synthetic turbulence",
+  "label": "Rise speed of a 10 mm bubble (m/s), slightly contaminated",
+  "expected": "0.2521 (C<sub>D</sub> = 8 Eo / (3 (Eo + 4)), Eo = 13.44)",
+  "normal": "0.2521",
+  "fine": "",
+  "source": "Shape branch of Tomiyama et al. (1998), closed form"
  }
 ]
