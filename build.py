@@ -18,11 +18,12 @@ META = {
     'name': 'Bubble and particle collision',
     'title': 'Bubble-particle collision efficiency simulator | Hashim Ishaque',
     'headline': 'Bubble and particle collision: the flow around a rising bubble',
-    'description': ('Navier-Stokes flow around a rising bubble, particle paths and collision efficiency for flotation, '
-                    'and synthetic PIV of the same flow. A theoretical simulation.'),
+    'description': ('Flow around a rising bubble, particle paths and collision efficiency for flotation, synthetic PIV, '
+                    'and a bubble swarm in turbulent liquid. Theoretical simulation.'),
     'image_alt': 'Streamlines around a 1 mm bubble with its wake, and the paths of 30 µm particles that hit or miss it',
     'keywords': ('flotation, bubble-particle collision, collision efficiency, Navier-Stokes, rising bubble, Maxey-Riley, '
-                 'particle trajectories, Sutherland, Weber-Paddock, Yoon-Luttrell, PIV, cross-correlation'),
+                 'particle trajectories, Sutherland, Weber-Paddock, Yoon-Luttrell, PIV, cross-correlation, bubble swarm, '
+                 'flotation cell turbulence, kinematic simulation, Kolmogorov spectrum, Tomiyama drag'),
     'languages': ['JavaScript', 'Python'],
     'about': [
         ('Froth flotation', 'https://en.wikipedia.org/wiki/Froth_flotation'),
@@ -101,6 +102,7 @@ def build(home, full):
     checks = json.loads((here / 'checks.json').read_text(encoding='utf-8'))
     page = page.replace('/*FLOW*/', module('flow.js'))
     page = page.replace('/*PIV*/', module('piv.js'))
+    page = page.replace('/*SWARM*/', module('swarm.js'))
     page = page.replace('/*CHECKS*/', json.dumps(checks, ensure_ascii=False))
     if not home.startswith('http'):
         page = page.replace('href="/*HOME*/" target="_blank" rel="noopener"', f'href="{home}"')
