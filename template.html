@@ -286,6 +286,12 @@ the blue ones to particles that miss, and the thick red path is the grazing one 
 touches it.
 </p>
 <p>
+While the flow is being solved, Figure 1 shows the progress instead. The left half has the
+streamlines of the present iterate, which starts from the Stokes solution. The right half plots
+the largest change of the vorticity in one iteration, which must fall below 10<sup>−8</sup>, and
+the drag coefficient, which should settle near the value from the drag correlation.
+</p>
+<p>
 The collision efficiency E is the fraction of the particles in the path of the bubble that
 collide with it. Small particles are collected by interception, when the streamline they follow
 passes within one particle radius of the surface. Heavier particles also settle across the
@@ -598,6 +604,7 @@ const cache = new Map();          // flow solutions by Re, surface and grid
 let run = 0;                       // id of the newest computation, so a stale one stops
 let current = null;                // inputs and results of the last finished computation
 let pivSeed = 2026;
+let prog = null;                   // progress of the flow solve that is running, shown in Figure 1
 
 // reads the form; values outside the model's range are limited, and the form shows what was used
 function readInputs() {
@@ -620,15 +627,20 @@ const FLOW_SRC = /*FLOWSRC*/;
 const WORKER_SRC = FLOW_SRC + `
 onmessage = (ev) => {
   const { Re, surf, g } = ev.data;
-  let lam = 0.8, st = createState(Re, surf, Object.assign({ lam }, g)), last = Date.now();
+  const steps = solveFlowSteps(Re, surf, g);
+  let hist = [], last = Date.now(), lastField = 0;
   for (;;) {
-    const rel = iterate(st, 25);
-    if (st.diverged) { lam *= 0.5; st = createState(Re, surf, Object.assign({ lam }, g)); continue; }
-    if (rel < 1e-8) { st.converged = true; break; }
-    if (st.iters > 80000) break;
-    if (Date.now() - last > 150) { postMessage({ progress: st.iters, cd: dragCoefficient(st).cd }); last = Date.now(); }
+    const s = steps.next();
+    if (s.done) { postMessage({ st: s.value }); return; }
+    if (s.value.restart) { hist = []; postMessage({ restart: true }); continue; }
+    hist.push(progressSnapshot(s.value.st, false));
+    const t = Date.now();
+    if (t - last > 150) {
+      const field = t - lastField > 600;
+      postMessage({ hist, snap: field ? progressSnapshot(s.value.st, true) : null });
+      hist = []; last = t; if (field) lastField = t;
+    }
   }
-  postMessage({ st });
 };`;
 let flowWorker = null, workerOk = typeof Worker !== 'undefined';
 function solveInWorker(Re, surf, g, id) {
@@ -641,7 +653,13 @@ function solveInWorker(Re, surf, g, id) {
     w.onerror = () => { workerOk = false; w.terminate(); resolve(undefined); };
     w.onmessage = (ev) => {
       if (id !== run) { w.terminate(); resolve(null); return; }
-      if (ev.data.progress !== undefined) { $('status').textContent = `Solving the Navier-Stokes equations: iteration ${ev.data.progress}, drag coefficient ${fix(ev.data.cd, 4)}.`; return; }
+      if (ev.data.restart) { prog.hist = []; return; }
+      if (ev.data.hist) {
+        for (const h of ev.data.hist) prog.hist.push([h.iters, h.change, h.cd]);
+        if (ev.data.snap) { prog.st = stateFromSnapshot(Re, surf, g, ev.data.snap); prog.stamp++; }
+        showProgress();
+        return;
+      }
       w.terminate(); if (flowWorker === w) flowWorker = null;
       resolve(ev.data.st);
     };
@@ -652,6 +670,7 @@ async function solve(Re, surf, grid, id) {
   const key = `${Re.toFixed(4)}|${surf}|${grid}`;
   if (cache.has(key)) return { st: cache.get(key), cached: true };
   const g = gridFor(Re, surf, grid);
+  prog = { Re, surf, grid, hist: [], st: null, stamp: 0, drawn: -1, lines: null };
   if (workerOk) {
     const t0 = now();
     const st = await solveInWorker(Re, surf, g, id);
@@ -666,21 +685,24 @@ async function solve(Re, surf, grid, id) {
     }
   }
   // fallback without a worker: the same iterations in small blocks on the page
-  let lam = 0.8;
-  let st = createState(Re, surf, Object.assign({ lam }, g));
+  prog.hist = [];
+  const steps = solveFlowSteps(Re, surf, g);
   const t0 = now();
+  let st, lastField = 0;
   for (;;) {
     const tS = now();
-    let done = false;
+    let s;
     while (now() - tS < 50) {
-      const rel = iterate(st, 25);
-      if (st.diverged) { lam *= 0.5; st = createState(Re, surf, Object.assign({ lam }, g)); break; }
-      if (rel < 1e-8) { st.converged = true; done = true; break; }
-      if (st.iters > 80000) { done = true; break; }
+      s = steps.next();
+      if (s.done) break;
+      if (s.value.restart) { prog.hist = []; continue; }
+      const h = progressSnapshot(s.value.st, false);
+      prog.hist.push([h.iters, h.change, h.cd]);
     }
     if (id !== run) return null;
-    if (done) break;
-    $('status').textContent = `Solving the Navier-Stokes equations: iteration ${st.iters}, drag coefficient ${fix(dragCoefficient(st).cd, 4)}.`;
+    if (s.done) { st = s.value; break; }
+    if (now() - lastField > 600) { prog.st = s.value.st; prog.stamp++; lastField = now(); }
+    showProgress();
     await tick();
   }
   st.seconds = (now() - t0) / 1000;
@@ -818,6 +840,30 @@ function contours(F, nx, nz, x0, z0, h, level) {
 const segPath = (segs) => segs.map((s) => `M${sx1(s[0][0]).toFixed(1)},${sz1(s[0][1]).toFixed(1)}L${sx1(s[1][0]).toFixed(1)},${sz1(s[1][1]).toFixed(1)}`).join('');
 const pathD = (pts) => pts.map((p, k) => (k ? 'L' : 'M') + sx1(p[0]).toFixed(1) + ',' + sz1(p[1]).toFixed(1)).join('');
 
+// streamlines and wake contours of a stream function, as SVG path data
+function streamlinePaths(ev) {
+  // stream function on a fine grid, symmetric about the axis
+  const h = 0.02, nx = Math.round((XR - XL) / h) + 1, nz = Math.round((ZB - ZT) / h) + 1;
+  const F = new Float64Array(nx * nz);
+  let pmin = 0;
+  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
+    const x = Math.abs(XL + i * h), z = ZT + j * h, r = Math.hypot(x, z);
+    const v = r <= 1 ? NaN : ev(r, Math.atan2(x, z));
+    F[j * nx + i] = v;
+    if (v < pmin) pmin = v;
+  }
+  // streamlines start at distances 0.15 to 2.45 radii from the axis far upstream (psi = s^2 / 2)
+  let d = '';
+  for (const s of [0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.25, 1.5, 1.8, 2.1, 2.45]) d += segPath(contours(F, nx, nz, XL, ZT, h, 0.5 * s * s));
+  const wake = pmin < -1e-5;
+  let dw = '', dwe = '';
+  if (wake) {
+    for (const fr of [0.15, 0.45, 0.75]) dw += segPath(contours(F, nx, nz, XL, ZT, h, fr * pmin));
+    dwe = segPath(contours(F, nx, nz, XL, ZT, h, 1e-3 * pmin));
+  }
+  return { d, wake, dw, dwe };
+}
+
 function drawFlow(c) {
   const svg = $('fig1');
   clear(svg);
@@ -829,26 +875,11 @@ function drawFlow(c) {
   el(cpA, 'rect', { x: fx0, y: fy0, width: fw, height: fh });
   const gL = el(svg, 'g', { 'clip-path': 'url(#c1l)' });
   const g = el(svg, 'g', { 'clip-path': 'url(#c1a)' });
-  // stream function on a fine grid, symmetric about the axis
-  const h = 0.02, nx = Math.round((XR - XL) / h) + 1, nz = Math.round((ZB - ZT) / h) + 1;
-  const F = new Float64Array(nx * nz);
-  let pmin = 0;
-  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
-    const x = Math.abs(XL + i * h), z = ZT + j * h, r = Math.hypot(x, z);
-    const v = r <= 1 ? NaN : c.st.ev(r, Math.atan2(x, z));
-    F[j * nx + i] = v;
-    if (v < pmin) pmin = v;
-  }
-  // streamlines start at distances 0.15 to 2.45 radii from the axis far upstream (psi = s^2 / 2)
-  let d = '';
-  for (const s of [0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.25, 1.5, 1.8, 2.1, 2.45]) d += segPath(contours(F, nx, nz, XL, ZT, h, 0.5 * s * s));
+  const { d, wake, dw, dwe } = streamlinePaths(c.st.ev);
   el(gL, 'path', { d, fill: 'none', stroke: '#000000', 'stroke-width': 0.8 });
-  const wake = pmin < -1e-5;
   if (wake) {
-    let dw = '';
-    for (const fr of [0.15, 0.45, 0.75]) dw += segPath(contours(F, nx, nz, XL, ZT, h, fr * pmin));
     el(g, 'path', { d: dw, fill: 'none', stroke: '#808080', 'stroke-width': 0.8 });
-    el(g, 'path', { d: segPath(contours(F, nx, nz, XL, ZT, h, 1e-3 * pmin)), fill: 'none', stroke: '#808080', 'stroke-width': 1, 'stroke-dasharray': '4 3' });
+    el(g, 'path', { d: dwe, fill: 'none', stroke: '#808080', 'stroke-width': 1, 'stroke-dasharray': '4 3' });
   }
   // axis of symmetry
   el(g, 'line', { x1: X01, y1: fy0, x2: X01, y2: fy0 + fh, stroke: '#000000', 'stroke-width': 0.6, 'stroke-dasharray': '14 3 3 3' });
@@ -895,6 +926,91 @@ function drawFlow(c) {
   txt(svg, sx1(XR / 2), fy0 + fh + 24, 'particle paths', { 'text-anchor': 'middle', 'font-style': 'italic' });
   const surfTxt = c.inp.surf === 'rigid' ? 'with frother (immobile surface)' : 'in clean water (mobile surface)';
   $('cap1').innerHTML = `<b>Figure 1.</b> Flow around a ${fmt(c.inp.db * 1e3, 3)} mm bubble ${surfTxt}, Re = ${fmt(c.Re, 3)}, drawn in the frame of the bubble, which rises. Left half: streamlines${wake ? '; grey: the recirculating wake, dashed where it meets the outer flow' : ''}. Right half: paths of ${fmt(c.inp.dp * 1e6, 3)} µm particles of density ${Math.round(c.inp.rhop)} kg/m³ that hit the bubble (red; thick: the grazing path) or miss it (blue).${c.pp.rp > 0.01 ? ' Dotted red: the collision sphere, one particle radius from the surface.' : ''}${c.xc < 0.015 ? ` The particles that hit start within ${fmt(c.xc, 1)} bubble radii of the axis, too close to it to be seen at this scale.` : ''} The bar is one bubble radius.`;
+}
+
+// ---------- Figure 1 while the flow is being solved ----------
+// Left half: streamlines of the present iterate. Right half: the change per iteration and the drag coefficient.
+// a small number as text, for example 9.9 × 10⁻⁵
+const pow10 = (x) => {
+  if (!(x > 0) || x >= 1e-3) return fmt(x, 2);
+  const e = Math.floor(Math.log10(x)), sup = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  return `${(x / 10 ** e).toFixed(1)} × 10⁻${String(-e).split('').map((k) => sup[+k]).join('')}`;
+};
+function showProgress() {
+  const P = prog, last = P.hist[P.hist.length - 1];
+  if (last) $('status').textContent = `Solving the Navier-Stokes equations: iteration ${last[0]}, change per iteration ${pow10(last[1])}, drag coefficient ${fix(last[2], 4)}.`;
+  if (!P.st) return;
+  const svg = $('fig1');
+  clear(svg);
+  el(svg, 'rect', { x: 0, y: 0, width: 600, height: 800, fill: '#ffffff' });
+  const fx0 = sx1(XL), fy0 = sz1(ZT), fh = K1 * (ZB - ZT);
+  const cpL = el(svg, 'clipPath', { id: 'c1p' });
+  el(cpL, 'rect', { x: fx0, y: fy0, width: K1 * (0 - XL), height: fh });
+  const gL = el(svg, 'g', { 'clip-path': 'url(#c1p)' });
+  if (P.drawn !== P.stamp) { P.lines = streamlinePaths(psiEvaluator(P.st)); P.drawn = P.stamp; P.linesIt = P.st.iters; }
+  const L = P.lines;
+  el(gL, 'path', { d: L.d, fill: 'none', stroke: '#000000', 'stroke-width': 0.8 });
+  if (L.wake) {
+    el(gL, 'path', { d: L.dw, fill: 'none', stroke: '#808080', 'stroke-width': 0.8 });
+    el(gL, 'path', { d: L.dwe, fill: 'none', stroke: '#808080', 'stroke-width': 1, 'stroke-dasharray': '4 3' });
+  }
+  el(gL, 'circle', { cx: X01, cy: Z01, r: K1, fill: '#e8e8e8', stroke: '#000000', 'stroke-width': 1.2 });
+  el(svg, 'line', { x1: X01, y1: fy0, x2: X01, y2: fy0 + fh, stroke: '#000000', 'stroke-width': 0.6, 'stroke-dasharray': '14 3 3 3' });
+  el(svg, 'rect', { x: fx0, y: fy0, width: K1 * (XR - XL), height: fh, fill: 'none', stroke: '#000000', 'stroke-width': 1 });
+  txt(svg, sx1(XL / 2), fy0 + fh + 24, `streamlines, iteration ${P.linesIt}`, { 'text-anchor': 'middle', 'font-style': 'italic' });
+  txt(svg, sx1(XR / 2), fy0 + fh + 24, 'convergence', { 'text-anchor': 'middle', 'font-style': 'italic' });
+  // the two plots share the iteration axis
+  const H = P.hist, x0 = 362, x1 = 558;
+  const itNow = H.length ? H[H.length - 1][0] : 0;
+  const itMax = [1000, 2000, 5000, 10000, 20000, 50000, 100000].find((v) => v >= itNow) || 100000;
+  const X = (it) => x0 + (x1 - x0) * it / itMax;
+  const axisX = (yb, label) => {
+    el(svg, 'line', { x1: x0, y1: yb, x2: x1, y2: yb, stroke: '#000000' });
+    for (const f of [0, 0.5, 1]) {
+      el(svg, 'line', { x1: X(f * itMax), y1: yb, x2: X(f * itMax), y2: yb + 5, stroke: '#000000' });
+      txt(svg, X(f * itMax), yb + 19, String(f * itMax), { 'text-anchor': 'middle', 'font-size': 13 });
+    }
+    if (label) txt(svg, (x0 + x1) / 2, yb + 37, 'iterations', { 'text-anchor': 'middle', 'font-size': 13 });
+  };
+  const line = (pts) => pts.map((q, k) => (k ? 'L' : 'M') + q[0].toFixed(1) + ',' + q[1].toFixed(1)).join('');
+  // plot a: the largest change of the vorticity in one iteration, relative to its largest value, log scale
+  const ya0 = 70, ya1 = 330, lo = -9, hi = -1;
+  const Ya = (v) => ya1 - (ya1 - ya0) * (clamp(Math.log10(v), lo, hi) - lo) / (hi - lo);
+  el(svg, 'line', { x1: x0, y1: ya0, x2: x0, y2: ya1, stroke: '#000000' });
+  for (let e = lo; e <= hi; e += 2) {
+    el(svg, 'line', { x1: x0 - 5, y1: Ya(10 ** e), x2: x0, y2: Ya(10 ** e), stroke: '#000000' });
+    const t = txt(svg, x0 - 7, Ya(10 ** e) + 5, '10', { 'text-anchor': 'end', 'font-size': 13 });
+    const sp = document.createElementNS(SVGNS, 'tspan');
+    sp.setAttribute('dy', -6); sp.setAttribute('font-size', 10); sp.textContent = String(e).replace('-', '−');
+    t.appendChild(sp);
+  }
+  el(svg, 'line', { x1: x0, y1: Ya(1e-8), x2: x1, y2: Ya(1e-8), stroke: '#808080', 'stroke-dasharray': '5 3' });
+  txt(svg, x1, Ya(1e-8) - 5, 'stop', { 'text-anchor': 'end', 'font-size': 13, fill: '#555555' });
+  txt(svg, x0 - 40, ya0 - 16, 'change per iteration', { 'font-size': 13 });
+  axisX(ya1, false);
+  if (H.length) el(svg, 'path', { d: line(H.filter((q) => q[1] > 0).map((q) => [X(q[0]), Ya(q[1])])), fill: 'none', stroke: '#0000cc', 'stroke-width': 1.2 });
+  // plot b: drag coefficient, with the value from the correlation used for the rise speed
+  const yb0 = 420, yb1 = 680;
+  const cdc = (P.surf === 'rigid' ? cdRigid : cdClean)(P.Re);
+  let cmin = cdc, cmax = cdc;
+  for (const q of H) { if (q[2] < cmin) cmin = q[2]; if (q[2] > cmax) cmax = q[2]; }
+  const pad = Math.max(0.05 * (cmax - cmin), 0.02 * cdc);
+  cmin -= pad; cmax += pad;
+  const Yb = (v) => yb1 - (yb1 - yb0) * (v - cmin) / (cmax - cmin);
+  el(svg, 'line', { x1: x0, y1: yb0, x2: x0, y2: yb1, stroke: '#000000' });
+  for (const f of [0, 0.5, 1]) {
+    const v = cmin + pad + f * (cmax - cmin - 2 * pad);
+    el(svg, 'line', { x1: x0 - 5, y1: Yb(v), x2: x0, y2: Yb(v), stroke: '#000000' });
+    txt(svg, x0 - 7, Yb(v) + 5, fmt(v, 3), { 'text-anchor': 'end', 'font-size': 13 });
+  }
+  el(svg, 'line', { x1: x0, y1: Yb(cdc), x2: x1, y2: Yb(cdc), stroke: '#808080', 'stroke-dasharray': '2 3' });
+  txt(svg, x1, Yb(cdc) + (H.length && H[H.length - 1][2] > cdc ? 16 : -5), 'correlation', { 'text-anchor': 'end', 'font-size': 13, fill: '#555555' });
+  txt(svg, x0 - 40, yb0 - 16, 'drag coefficient', { 'font-size': 13 });
+  axisX(yb1, true);
+  if (H.length) el(svg, 'path', { d: line(H.map((q) => [X(q[0]), Yb(q[2])])), fill: 'none', stroke: '#cc0000', 'stroke-width': 1.2 });
+  const surfTxt = P.surf === 'rigid' ? 'with frother (immobile surface)' : 'in clean water (mobile surface)';
+  const corr = P.surf === 'rigid' ? 'Schiller and Naumann (1933)' : 'Mei, Klausner and Lawrence (1994)';
+  $('cap1').innerHTML = `<b>Figure 1</b>, while the solver runs. Flow around the bubble ${surfTxt}, Re = ${fmt(P.Re, 3)}. Left half: streamlines of the present iterate, which starts from the Stokes solution and is redrawn about twice a second. Right half, top: the largest change of the vorticity in one iteration, relative to its largest value; the solver stops below 10<sup>−8</sup> (dashed). Bottom: the drag coefficient of the present iterate, and dotted the value from ${corr}, the correlation used for the rise speed. The particle paths follow when the flow has converged.`;
 }
 
 // ---------- Figure 2: collision efficiency against particle size ----------
