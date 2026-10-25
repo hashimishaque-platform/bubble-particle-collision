@@ -188,6 +188,34 @@ function solveFlow(Re, surface, opts) {
   }
 }
 
+// The solve as the page runs it: relaxation 0.8, halved with a fresh start if the iteration diverges, blocks
+// of 25 iterations, stop when the change per iteration is below 1e-8 or after 80 000 iterations.
+// Yields after every block that does not finish the solve, so the caller can show the progress; returns the state.
+function* solveFlowSteps(Re, surface, g) {
+  let lam = 0.8, st = createState(Re, surface, Object.assign({ lam }, g));
+  for (;;) {
+    const rel = iterate(st, 25);
+    if (st.diverged) { lam *= 0.5; st = createState(Re, surface, Object.assign({ lam }, g)); yield { st, rel: NaN, restart: true }; continue; }
+    if (rel < 1e-8) { st.converged = true; return st; }
+    if (st.iters > 80000) return st;
+    yield { st, rel, restart: false };
+  }
+}
+
+// Progress of a solve, for Figure 1: one history point, and with field = true a copy of the present iterate.
+function progressSnapshot(st, field) {
+  const p = { iters: st.iters, change: st.change, cd: dragCoefficient(st).cd, lam: st.lam };
+  if (field) { p.psi = st.psi.slice(); p.zeta = st.zeta.slice(); }
+  return p;
+}
+// A state rebuilt from a snapshot with a field, so that psiEvaluator and dragCoefficient can be used on it.
+function stateFromSnapshot(Re, surface, g, snap) {
+  const st = createState(Re, surface, Object.assign({ lam: snap.lam }, g));
+  st.psi.set(snap.psi); st.zeta.set(snap.zeta);
+  st.iters = snap.iters; st.change = snap.change;
+  return st;
+}
+
 // ---------- quantities from a solution ----------
 function wallData(st) {
   const { N, M, W, dxi, dth, psi, zeta, s, c } = st;
@@ -568,7 +596,7 @@ function collisionInertial(sample, evalPsi, pp, opts) {
 if (typeof module !== 'undefined') {
   module.exports = {
     GRAV, cdRigid, cdClean, sepAngleClift, terminalVelocity, ecSutherland, ecGaudin, ecYoonLuttrell, ecWeberPaddock, ANALYTIC,
-    gridFor, makeGrid, createState, iterate, solveFlow, wallData, dragCoefficient, separationAngle, wakeLength,
+    gridFor, makeGrid, createState, iterate, solveFlow, solveFlowSteps, progressSnapshot, stateFromSnapshot, wallData, dragCoefficient, separationAngle, wakeLength,
     psiEvaluator, nodeFields, flowSampler, particleParams, collisionStream, streamOffset, trajectory, tracer,
     collisionInertialSteps, collisionInertial,
   };
