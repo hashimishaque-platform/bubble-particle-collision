@@ -7,7 +7,8 @@ The project stays theoretical: no measured data and no data from any research ce
 ## Responsiveness
 - [x] Run the flow solver in a Web Worker so the page stays responsive, with results identical to the current ones. (2026-10-20)
   The worker runs the same iterations in the same order as the page did, so the results are identical; without workers the page falls back to the old way.
-- [ ] Show the solver progress in Figure 1 while it runs.
+- [x] Show the solver progress in Figure 1 while it runs. (2026-10-25)
+  Streamlines of the present iterate, the change per iteration and the drag coefficient against the correlation; the reports only read the solver state, so the result is unchanged.
 
 ## Generalised Sutherland equation
 - [ ] Add Dukhin's generalised Sutherland equation for mobile surfaces, as given by Dai, Fornasiero and Ralston (2000), verified against numbers worked from the paper.
