@@ -92,6 +92,49 @@ for (const surf of ['rigid', 'free']) {
     fx(a.E, 5), fx(b.E, 5), '', `Same flow; difference ${pct(b.E, a.E)}`);
 }
 
+// ---- solver progress shown in Figure 1 ----
+{
+  const G = 'Solver progress shown in Figure 1';
+  // the page loop before progress was shown: blocks of 25 iterations, the same stops and restarts
+  const plain = (Re, surf, g) => {
+    let lam = 0.8, st = F.createState(Re, surf, Object.assign({ lam }, g));
+    for (;;) {
+      const rel = F.iterate(st, 25);
+      if (st.diverged) { lam *= 0.5; st = F.createState(Re, surf, Object.assign({ lam }, g)); continue; }
+      if (rel < 1e-8) { st.converged = true; return st; }
+      if (st.iters > 80000) return st;
+    }
+  };
+  const res = { diff: [], rebuilt: [], last: [], iters: [] };
+  for (const q of ['normal', 'fine']) {
+    const g = F.gridFor(100, 'rigid', q), a = plain(100, 'rigid', g);
+    const steps = F.solveFlowSteps(100, 'rigid', g);
+    let s, snap = null, cdAt = NaN, psiAt = NaN, hist = [];
+    for (;;) {
+      s = steps.next();
+      if (s.done) break;
+      const h = F.progressSnapshot(s.value.st, s.value.st.iters === 1000);
+      hist.push(h);
+      if (h.psi) { snap = h; cdAt = F.dragCoefficient(s.value.st).cd; psiAt = F.psiEvaluator(s.value.st)(1.5, 2.0); }
+    }
+    const b = s.value;
+    let d = 0;
+    for (let k = 0; k < a.psi.length; k++) d = Math.max(d, Math.abs(a.psi[k] - b.psi[k]), Math.abs(a.zeta[k] - b.zeta[k]));
+    const rb = F.stateFromSnapshot(100, 'rigid', g, snap);
+    res.diff.push(d);
+    res.rebuilt.push(Math.abs(F.dragCoefficient(rb).cd - cdAt) + Math.abs(F.psiEvaluator(rb)(1.5, 2.0) - psiAt));
+    res.last.push(hist[hist.length - 1].cd / F.dragCoefficient(b).cd);
+    res.iters.push([b.iters, hist[hist.length - 1].iters, hist[hist.length - 1].change]);
+  }
+  add(G, 'Re = 100, immobile surface: the solve with progress reports against the same iterations without them, largest difference of the stream function and vorticity', '0 (identical)',
+    String(res.diff[0]), String(res.diff[1]), 'The progress reports only read the solver state');
+  add(G, 'Same: drag coefficient and stream function at r = 1.5 a, θ = 2 of the field sent at iteration 1000 and rebuilt on the page, minus those of the solver at iteration 1000 (sum of the differences)', '0',
+    String(res.rebuilt[0]), String(res.rebuilt[1]), 'The page draws the streamlines from the same numbers as the solver holds');
+  add(G, 'Same: drag coefficient at the last progress report divided by the converged value', '1',
+    `${fx(res.last[0], 6)} (iteration ${res.iters[0][1]} of ${res.iters[0][0]})`, `${fx(res.last[1], 6)} (iteration ${res.iters[1][1]} of ${res.iters[1][0]})`, 'The curve in Figure 1 ends at the converged drag');
+  if (res.diff.some((v) => v !== 0) || res.rebuilt.some((v) => v !== 0) || res.last.some((v) => Math.abs(v - 1) > 1e-5)) { console.error('solver progress checks failed'); process.exitCode = 1; }
+}
+
 // ---- PIV ----
 {
   const w = 256, h = 256, rand = P.mulberry32(7), dx = 2.3, dy = -1.7;

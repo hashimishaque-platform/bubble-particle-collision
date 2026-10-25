@@ -23,7 +23,8 @@ were used.
 - Solves the steady, axisymmetric Navier-Stokes equations for water flowing past a spherical
   bubble, for an immobile surface (water with frother) or a mobile one (clean water). The rise
   speed comes from a force balance with the Schiller-Naumann or the Mei, Klausner and Lawrence
-  drag correlation.
+  drag correlation. While the solver runs, Figure 1 shows the streamlines of the present iterate,
+  the change per iteration and the drag coefficient, so the convergence can be watched.
 - Follows particles through the flow with the Maxey-Riley equation (drag, settling, pressure
   gradient and added mass) and finds the collision efficiency from interception, settling and
   inertia, next to the Sutherland, Weber-Paddock and Yoon-Luttrell correlations.

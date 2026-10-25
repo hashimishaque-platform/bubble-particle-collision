@@ -192,6 +192,30 @@
   "source": "Same flow; difference −0.02 %"
  },
  {
+  "group": "Solver progress shown in Figure 1",
+  "label": "Re = 100, immobile surface: the solve with progress reports against the same iterations without them, largest difference of the stream function and vorticity",
+  "expected": "0 (identical)",
+  "normal": "0",
+  "fine": "0",
+  "source": "The progress reports only read the solver state"
+ },
+ {
+  "group": "Solver progress shown in Figure 1",
+  "label": "Same: drag coefficient and stream function at r = 1.5 a, θ = 2 of the field sent at iteration 1000 and rebuilt on the page, minus those of the solver at iteration 1000 (sum of the differences)",
+  "expected": "0",
+  "normal": "0",
+  "fine": "0",
+  "source": "The page draws the streamlines from the same numbers as the solver holds"
+ },
+ {
+  "group": "Solver progress shown in Figure 1",
+  "label": "Same: drag coefficient at the last progress report divided by the converged value",
+  "expected": "1",
+  "normal": "1.000000 (iteration 2300 of 2325)",
+  "fine": "1.000000 (iteration 3725 of 3750)",
+  "source": "The curve in Figure 1 ends at the converged drag"
+ },
+ {
   "group": "Synthetic PIV",
   "label": "Uniform shift of 2.3 and −1.7 pixels, 32 px windows: random error of one displacement component",
   "expected": "about 0.05 px or less",
