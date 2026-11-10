@@ -11,6 +11,29 @@ program: everything is computed in the browser, with no server and no libraries.
 
 ![Flow around a 1 mm bubble with frother and the paths of 30 µm quartz particles](screenshot.png)
 
+## How to run it
+
+Use it online at the link above, or run it on your own computer. You need
+[Node.js](https://nodejs.org) 18 or newer for the checks and Python 3 to rebuild the page.
+No packages need to be installed for the page itself.
+
+```
+git clone https://github.com/hashimishaque-platform/bubble-particle-collision.git
+cd bubble-particle-collision
+python3 -m http.server 8000      # then open http://localhost:8000 in a browser
+```
+
+Batch runs without a browser use the same code:
+
+```
+node cli.js examples/rise-speed.json --csv rise.csv
+```
+
+The case files are in `examples/` and the options are described in [docs/cli.md](docs/cli.md).
+To change the program, edit `template.html` or one of the `.js` files and rebuild the page with `python3 build.py`.
+Then run the checks with `node checks.js`; it prints a table of each check with the
+expected value and the result of the program. The checks take about three minutes and update `checks.json`.
+
 ## About the data
 
 This is a theoretical simulation. The flow is computed from the Navier-Stokes equations, the
