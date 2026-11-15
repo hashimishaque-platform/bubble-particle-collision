@@ -136,6 +136,54 @@
   "source": "Exact: w<sub>s</sub> / (U + w<sub>s</sub>)"
  },
  {
+  "group": "Generalised Sutherland equation, mobile surface",
+  "label": "Limit of a Stokes number K<sub>3</sub> → 0 (10<sup>−6</sup>), d<sub>p</sub>/d<sub>b</sub> = 0.01: E against Sutherland, 3 d<sub>p</sub>/d<sub>b</sub>",
+  "expected": "0.03000",
+  "normal": "0.03000",
+  "fine": "",
+  "source": "Dai et al. (1998): the angle of tangency goes to 90° and the GSE to Sutherland (1948)"
+ },
+ {
+  "group": "Generalised Sutherland equation, mobile surface",
+  "label": "Same, K<sub>3</sub> = 0.01: written with 2 E<sub>Su</sub> sin²θ<sub>t</sub> in the last term against the form printed by Sajjad and Otsuki (2022), and the angle of tangency",
+  "expected": "0.015304, 70.53°",
+  "normal": "0.015304, 70.53°",
+  "fine": "",
+  "source": "The two forms are equal because sin²θ<sub>t</sub> = 2β cos θ<sub>t</sub>"
+ },
+ {
+  "group": "Generalised Sutherland equation, mobile surface",
+  "label": "Potential flow, particle with Stokes drag only, d<sub>p</sub>/d<sub>b</sub> = 0.01, K<sub>3</sub> = 0.001: GSE against integrated paths",
+  "expected": "0.02726",
+  "normal": "0.02758",
+  "fine": "",
+  "source": "Dukhin's model problem, solved here by bisection on the paths; difference +1.17 %"
+ },
+ {
+  "group": "Generalised Sutherland equation, mobile surface",
+  "label": "Potential flow, particle with Stokes drag only, d<sub>p</sub>/d<sub>b</sub> = 0.01, K<sub>3</sub> = 0.003: GSE against integrated paths",
+  "expected": "0.02306",
+  "normal": "0.02358",
+  "fine": "",
+  "source": "Dukhin's model problem, solved here by bisection on the paths; difference +2.25 %"
+ },
+ {
+  "group": "Generalised Sutherland equation, mobile surface",
+  "label": "Potential flow, particle with Stokes drag only, d<sub>p</sub>/d<sub>b</sub> = 0.01, K<sub>3</sub> = 0.01: GSE against integrated paths",
+  "expected": "0.01530",
+  "normal": "0.01574",
+  "fine": "",
+  "source": "Dukhin's model problem, solved here by bisection on the paths; difference +2.87 %"
+ },
+ {
+  "group": "Generalised Sutherland equation, mobile surface",
+  "label": "Potential flow, particle with Stokes drag only, d<sub>p</sub>/d<sub>b</sub> = 0.01, K<sub>3</sub> = 0.1: GSE against integrated paths (a large Stokes number, where the two part)",
+  "expected": "0.00564",
+  "normal": "0.01430",
+  "fine": "",
+  "source": "Dukhin's model problem, solved here by bisection on the paths; difference +153.73 %"
+ },
+ {
   "group": "Collision efficiency, immobile surface, interception only",
   "label": "E / (d<sub>p</sub>/d<sub>b</sub>)² for small particles, Re = 1",
   "expected": "1.73 (Yoon and Luttrell: 1.77)",

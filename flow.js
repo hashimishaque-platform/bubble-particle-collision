@@ -35,6 +35,36 @@ const ecYoonLuttrell = (rp, Re) => (1.5 + 4 * Math.pow(Re, 0.72) / 15) * rp * rp
 const ecWeberPaddock = (rp, Re) => 1.5 * (1 + (3 / 16) * Re / (1 + 0.249 * Math.pow(Re, 0.56))) * rp * rp;   // intermediate Re, immobile surface
 // rp = particle radius / bubble radius
 
+// Generalised Sutherland equation (GSE) of Dukhin for a mobile surface in potential flow, with particle inertia,
+// Dai, Dukhin, Fornasiero and Ralston (1998); Dai, Fornasiero and Ralston (2000); equations as printed by
+// Sajjad and Otsuki (2022, eqs. 3 to 6), here with the last term rewritten using sin^2(th_t) = 2 beta cos(th_t):
+//   E = E_Su sin^2(th_t) exp{ 3 K3 [ cos(th_t) (ln(3 / E_Su) - 1.8) - (2 + cos^3(th_t) - 3 cos(th_t)) / (2 E_Su sin^2(th_t)) ] }
+//   E_Su = 3 d_p / d_b,  th_t = arcsin{ [2 beta (sqrt(1 + beta^2) - beta)]^(1/2) },  beta = 4 E_Su / (9 K3)
+//   K3 = (rho_p - rho_l) U d_p^2 / (9 mu d_b)
+// th_t is the angle of tangency, measured from the front stagnation point: particles that reach the surface
+// beyond it are thrown off by inertia. For K3 -> 0, th_t -> 90 degrees and E -> E_Su. Defined for K3 > 0 only.
+// Dukhin's derivation holds for small particles and small Stokes numbers.
+function ecGSE(rp, K3) {
+  const Esu = 3 * rp;
+  if (!(K3 > 0)) return { E: NaN, thetaT: NaN, beta: NaN, Esu };
+  const beta = 4 * Esu / (9 * K3);
+  // 2 beta (sqrt(1 + beta^2) - beta) written as 2 beta / (sqrt(1 + beta^2) + beta), which keeps its digits at large beta
+  const s2 = 2 * beta / (Math.sqrt(1 + beta * beta) + beta);
+  const c = Math.sqrt(Math.max(0, 1 - s2));
+  const E = Esu * s2 * Math.exp(3 * K3 * (c * (Math.log(3 / Esu) - 1.8) - (2 + c * c * c - 3 * c) / (2 * Esu * s2)));
+  return { E, thetaT: Math.asin(Math.sqrt(s2)), beta, Esu };
+}
+
+// Potential flow past a sphere in the bubble frame (x radial, z along the flow, lengths in bubble radii) with its
+// material acceleration, for checks of the inertial trajectories against the GSE. Returns [u_x, u_z, Du_x/Dt, Du_z/Dt].
+function potentialSampler(x, z) {
+  const r2 = x * x + z * z, r = Math.sqrt(r2), r5 = r2 * r2 * r, r7 = r5 * r2;
+  const ux = -1.5 * x * z / r5, uz = 1 + 0.5 / (r2 * r) - 1.5 * z * z / r5;
+  const uxx = -1.5 * z * (1 / r5 - 5 * x * x / r7), uxz = -1.5 * x * (1 / r5 - 5 * z * z / r7);
+  const uzx = -1.5 * x / r5 + 7.5 * z * z * x / r7, uzz = -4.5 * z / r5 + 7.5 * z * z * z / r7;
+  return [ux, uz, ux * uxx + uz * uxz, ux * uzx + uz * uzz];
+}
+
 // ---------- analytic stream functions (dimensionless) ----------
 const ANALYTIC = {
   stokesRigid: (r, th) => 0.5 * Math.sin(th) ** 2 * (r * r - 1.5 * r + 0.5 / r),
@@ -441,6 +471,7 @@ function particleParams(bub, par) {
     wsDim, Rep,
     St: (rhop + 0.5 * rhoL) * dp * dp * U / (18 * mu * f * a),
     beta: 1.5 / (rhop / rhoL + 0.5),
+    K3: drho * dp * dp * U / (9 * mu * db),             // Stokes number of the GSE (Dai et al. 1998)
   };
 }
 
@@ -595,7 +626,7 @@ function collisionInertial(sample, evalPsi, pp, opts) {
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    GRAV, cdRigid, cdClean, sepAngleClift, terminalVelocity, ecSutherland, ecGaudin, ecYoonLuttrell, ecWeberPaddock, ANALYTIC,
+    GRAV, cdRigid, cdClean, sepAngleClift, terminalVelocity, ecSutherland, ecGaudin, ecYoonLuttrell, ecWeberPaddock, ecGSE, potentialSampler, ANALYTIC,
     gridFor, makeGrid, createState, iterate, solveFlow, solveFlowSteps, progressSnapshot, stateFromSnapshot, wallData, dragCoefficient, separationAngle, wakeLength,
     psiEvaluator, nodeFields, flowSampler, particleParams, collisionStream, streamOffset, trajectory, tracer,
     collisionInertialSteps, collisionInertial,
