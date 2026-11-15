@@ -11,7 +11,8 @@ The project stays theoretical: no measured data and no data from any research ce
   Streamlines of the present iterate, the change per iteration and the drag coefficient against the correlation; the reports only read the solver state, so the result is unchanged.
 
 ## Generalised Sutherland equation
-- [ ] Add Dukhin's generalised Sutherland equation for mobile surfaces, as given by Dai, Fornasiero and Ralston (2000), verified against numbers worked from the paper.
+- [x] Add Dukhin's generalised Sutherland equation for mobile surfaces, as given by Dai, Fornasiero and Ralston (2000), verified against numbers worked from the paper. (2026-11-15)
+  The full text of Dai et al. (1998, 2000) could not be reached, so no table values from the papers are used. The equation is taken as reprinted by Sajjad and Otsuki (2022, eqs. 3 to 6), checked to equal the form with 2 E_Su sin²θ_t in the denominator, its limit K3 → 0 (Sutherland), and particle paths in potential flow (within 3 % for K3 up to 0.01).
 - [ ] Plot it with the inertial curve for clean bubbles and add a check row comparing the two.
 
 ## Partly mobile surface

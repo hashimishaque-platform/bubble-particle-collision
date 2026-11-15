@@ -56,6 +56,32 @@ const G3 = 'Collision efficiency, exact limits';
   add(G3, 'Stokes flow, settling only (point particle, settling speed 0.1 U)', fx(ws / (1 + ws), 5), fx(F.collisionStream(F.ANALYTIC.stokesRigid, 1e-6, ws).E, 5), '', 'Exact: w<sub>s</sub> / (U + w<sub>s</sub>)');
 }
 
+// ---- generalised Sutherland equation (mobile surface, inertia) ----
+{
+  const G = 'Generalised Sutherland equation, mobile surface';
+  const rp = 0.01;
+  const a = F.ecGSE(rp, 1e-6);
+  add(G, `Limit of a Stokes number K<sub>3</sub> → 0 (10${sup('−6')}), ${RATIO} = 0.01: E against Sutherland, 3 d<sub>p</sub>/d<sub>b</sub>`, fx(3 * rp, 5), fx(a.E, 5), '',
+    'Dai et al. (1998): the angle of tangency goes to 90° and the GSE to Sutherland (1948)');
+  // the same equation as printed by Sajjad and Otsuki (2022), eqs. 3 to 6, with sin^4 in the second term
+  const K3 = 0.01, Esu = 3 * rp, beta = 4 * Esu / (9 * K3);
+  const tt = Math.asin(Math.sqrt(2 * beta * (Math.sqrt(1 + beta * beta) - beta))), c = Math.cos(tt), sn = Math.sin(tt);
+  const Eso = Esu * sn * sn * Math.exp((3 * K3 * (Math.log(3 / Esu) - 1.8) - 4 * (2 / 3 + c ** 3 / 3 - c) / sn ** 4) * c);
+  const b = F.ecGSE(rp, K3);
+  add(G, `Same, K<sub>3</sub> = 0.01: written with 2 E<sub>Su</sub> sin²θ<sub>t</sub> in the last term against the form printed by Sajjad and Otsuki (2022), and the angle of tangency`,
+    `${fx(Eso, 6)}, ${fx(tt * 180 / Math.PI, 2)}°`, `${fx(b.E, 6)}, ${fx(b.thetaT * 180 / Math.PI, 2)}°`, '', 'The two forms are equal because sin²θ<sub>t</sub> = 2β cos θ<sub>t</sub>');
+  // inertial trajectories in potential flow, Stokes drag only, Stokes number K3: Dukhin's model problem
+  let bad = Math.abs(a.E / (3 * rp) - 1) > 1e-3 || Math.abs(b.E / Eso - 1) > 1e-12;
+  for (const K of [0.001, 0.003, 0.01, 0.1]) {
+    const g = F.ecGSE(rp, K), t = F.collisionInertial(F.potentialSampler, F.ANALYTIC.potential, { rp, ws: 0, St: K, beta: 0 }, { z0: -10 });
+    const lim = K <= 0.01;
+    add(G, `Potential flow, particle with Stokes drag only, ${RATIO} = 0.01, K<sub>3</sub> = ${K}: GSE against integrated paths` + (lim ? '' : ' (a large Stokes number, where the two part)'),
+      fx(g.E, 5), fx(t.E, 5), '', `Dukhin's model problem, solved here by bisection on the paths; difference ${pct(t.E, g.E)}`);
+    if (lim && Math.abs(t.E / g.E - 1) > 0.05) bad = true;
+  }
+  if (bad) { console.error('generalised Sutherland checks failed'); process.exitCode = 1; }
+}
+
 // ---- collision, computed flows ----
 const G4 = 'Collision efficiency, immobile surface, interception only';
 for (const Re of [1, 10, 50, 100]) {

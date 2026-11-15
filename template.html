@@ -48,6 +48,7 @@ p.dl input { margin: 0 4px 4px 0; font-size: 14px; }
 pre { font-size: 14px; overflow-x: auto; margin: 0 0 10px 0; }
 #notes p, #pivnotes p { margin: 0 0 6px 0; }
 #status { min-height: 1.4em; }
+p.eq { margin-left: 1.5em; overflow-wrap: anywhere; }
 table.data.wide { min-width: 40em; }
 @media (max-width: 760px) { .tool .side { order: -1; } }
 </style>
@@ -305,6 +306,21 @@ standard correlations for interception. E can exceed 1 for large particles, beca
 collision sphere is larger than the bubble.
 </p>
 <p>
+For a mobile surface the results table also gives Dukhin's generalised Sutherland equation
+(Dai et al. 1998, 2000; equations as printed by Sajjad and Otsuki 2022). It describes the loss by inertia in potential flow, for a particle with Stokes
+drag only and the Stokes number K<sub>3</sub> = (ρ<sub>p</sub> − ρ<sub>l</sub>) U d<sub>p</sub><sup>2</sup> / (9 μ d<sub>b</sub>):
+</p>
+<p class="eq">E = E<sub>Su</sub> sin<sup>2</sup>θ<sub>t</sub> exp{ 3 K<sub>3</sub> [ cos θ<sub>t</sub> (ln(3/E<sub>Su</sub>) − 1.8) − (2 + cos<sup>3</sup>θ<sub>t</sub> − 3 cos θ<sub>t</sub>) / (2 E<sub>Su</sub> sin<sup>2</sup>θ<sub>t</sub>) ] },</p>
+<p>
+with E<sub>Su</sub> = 3 d<sub>p</sub>/d<sub>b</sub> (Sutherland 1948), the angle of tangency
+θ<sub>t</sub> = arcsin{ [2β (√(1 + β<sup>2</sup>) − β)]<sup>1/2</sup> } and β = 4 E<sub>Su</sub> / (9 K<sub>3</sub>).
+Particles that reach the surface beyond θ<sub>t</sub>, counted from the front, are thrown off
+again. As K<sub>3</sub> goes to 0, θ<sub>t</sub> goes to 90° and E to Sutherland's value. The
+checks compare the equation with particle paths in potential flow. They agree within a few per
+cent for K<sub>3</sub> up to 0.01 and part at larger Stokes numbers. The equation is not defined
+for particles lighter than water.
+</p>
+<p>
 In the PIV figures the error is small away from the bubble and large next to it. An
 interrogation window close to the surface averages over a steep velocity gradient and partly
 over the bubble itself, where there are no tracers. That is a property of window-based PIV,
@@ -503,7 +519,7 @@ the ranges below where it can, and the notes under each result say when a case i
 <tr><td>Navier-Stokes flow around the bubble (Figures 1 to 4)</td><td class="l">Steady, axisymmetric flow past a sphere; bubble diameter up to 1.2 mm with frother (Re below about 160) and 0.7 mm in clean water</td><td class="l">Drag, wake length and separation angle for Re = 0.1 to 150</td></tr>
 <tr><td>Rise speed, Figures 1 to 4</td><td class="l">Schiller-Naumann for an immobile surface (Re below 800); Mei, Klausner and Lawrence for a clean spherical bubble</td><td class="l">Drag of the computed flow against both, Re = 0.1 to 100</td></tr>
 <tr><td>Particle motion</td><td class="l">Maxey-Riley equation without history and lift forces; particles much smaller than the bubble (at most 0.3 times its diameter); particles do not disturb the flow</td><td class="l">Paths without inertia against the exact stream function; two integrators against each other</td></tr>
-<tr><td>Collision correlations</td><td class="l">Sutherland: potential flow, mobile surface, small particles. Weber-Paddock and Yoon-Luttrell: immobile surface, intermediate Re</td><td class="l">Against the computed flow for Re = 1 to 100</td></tr>
+<tr><td>Collision correlations</td><td class="l">Sutherland: potential flow, mobile surface, small particles. Generalised Sutherland equation: the same with inertia, small Stokes numbers, particles heavier than water. Weber-Paddock and Yoon-Luttrell: immobile surface, intermediate Re</td><td class="l">Against the computed flow for Re = 1 to 100; the generalised Sutherland equation against particle paths in potential flow</td></tr>
 <tr><td>Synthetic PIV</td><td class="l">Motion within the light sheet only; no reflections at the bubble</td><td class="l">Random error for a uniform shift</td></tr>
 <tr><td>Bubble swarm (Figures 5 and 6)</td><td class="l">Kinematic picture: potential flow around volume-equivalent spheres a few radii apart; frozen, homogeneous synthetic turbulence; Tomiyama drag and Wellek shape for single bubbles (Wellek: contaminated liquids)</td><td class="l">Surface condition and divergence of the bubble flow; energy and divergence of the turbulence; limits of the drag correlation</td></tr>
 <tr><td>Live flow simulation (Figures 7 and 8)</td><td class="l">Two-dimensional flow past an elliptic cylinder with an immobile surface; Re up to 1500 in the program, with a subgrid model above a few hundred; 20 cells per diameter</td><td class="l">Taylor-Green decay; cylinder benchmark at Re = 100; particle response</td></tr>
@@ -526,6 +542,8 @@ the ranges below where it can, and the notes under each result say when a case i
 <li>Weber, M. E.; Paddock, D. Interceptional and gravitational collision efficiencies for single collectors at intermediate Reynolds numbers. <i>J. Colloid Interface Sci.</i> 94 (1983) 328 to 335.</li>
 <li>Yoon, R.-H.; Luttrell, G. H. The effect of bubble size on fine particle flotation. <i>Miner. Process. Extr. Metall. Rev.</i> 5 (1989) 101 to 122.</li>
 <li>Dai, Z.; Fornasiero, D.; Ralston, J. Particle-bubble collision models: a review. <i>Adv. Colloid Interface Sci.</i> 85 (2000) 231 to 256.</li>
+<li>Dai, Z.; Dukhin, S.; Fornasiero, D.; Ralston, J. The inertial hydrodynamic interaction of particles and rising bubbles with mobile surfaces. <i>J. Colloid Interface Sci.</i> 197 (1998) 275 to 292. <a href="https://pubmed.ncbi.nlm.nih.gov/9466870/" target="_blank" rel="noopener">PubMed 9466870</a></li>
+<li>Sajjad, M.; Otsuki, A. Coupling flotation rate constant and viscosity models. <i>Metals</i> 12 (2022) 409, eqs. 3 to 6. <a href="https://doi.org/10.3390/met12030409" target="_blank" rel="noopener">doi:10.3390/met12030409</a></li>
 <li>Li, S.; Kou, J.; Sun, C. Effect of bubble surface properties on bubble-particle collision efficiency in froth flotation. <i>Minerals</i> 10 (2020) 367. <a href="https://doi.org/10.3390/min10040367" target="_blank" rel="noopener">doi:10.3390/min10040367</a></li>
 <li>Tomiyama, A.; Kataoka, I.; Zun, I.; Sakaguchi, T. Drag coefficients of single bubbles under normal and micro gravity conditions. <i>JSME Int. J. Ser. B</i> 41 (1998) 472 to 479. <a href="https://doi.org/10.1299/jsmeb.41.472" target="_blank" rel="noopener">doi:10.1299/jsmeb.41.472</a></li>
 <li>Wellek, R. M.; Agrawal, A. K.; Skelland, A. H. P. Shape of liquid drops moving in liquid media. <i>AIChE J.</i> 12 (1966) 854 to 862.</li>
@@ -1126,7 +1144,11 @@ function writeResults(c) {
   row('With settling', fmtE(c.Eg.E, 3));
   row('With settling and inertia', c.Einr ? `${fmtE(c.Einr.E, 3)} (${signed(100 * (c.Einr.E / c.Eg.E - 1))})` : 'same (Stokes number below 0.001)');
   if (rigid) row('Weber and Paddock, interception', fmtE(ecWeberPaddock(c.pp.rp, c.Re), 3));
-  else row('Sutherland, interception', fmtE(ecSutherland(c.pp.rp), 3));
+  else {
+    row('Sutherland, interception', fmtE(ecSutherland(c.pp.rp), 3));
+    const gse = ecGSE(c.pp.rp, c.pp.K3);
+    row(`Generalised Sutherland (K<sub>3</sub> = ${fmtE(c.pp.K3, 2)})`, c.pp.K3 > 0 ? `${fmtE(gse.E, 3)}, θ<sub>t</sub> = ${fix(gse.thetaT * 180 / Math.PI, 0)}°` : 'not defined (particle not heavier than water)');
+  }
   row('Grazing point without inertia, from the front', `${fix(180 - c.Eg.thetaGraze * 180 / Math.PI, 0)}°`);
   $('results').innerHTML = rows.join('');
   const notes = [];

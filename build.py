@@ -22,7 +22,7 @@ META = {
                     'and a bubble swarm in turbulent liquid. Theoretical simulation.'),
     'image_alt': 'Streamlines around a 1 mm bubble with its wake, and the paths of 30 µm particles that hit or miss it',
     'keywords': ('flotation, bubble-particle collision, collision efficiency, Navier-Stokes, rising bubble, Maxey-Riley, '
-                 'particle trajectories, Sutherland, Weber-Paddock, Yoon-Luttrell, PIV, cross-correlation, bubble swarm, '
+                 'particle trajectories, Sutherland, generalised Sutherland equation, Weber-Paddock, Yoon-Luttrell, PIV, cross-correlation, bubble swarm, '
                  'flotation cell turbulence, kinematic simulation, Kolmogorov spectrum, Tomiyama drag'),
     'languages': ['JavaScript', 'Python'],
     'about': [

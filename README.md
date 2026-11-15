@@ -50,7 +50,9 @@ were used.
   the change per iteration and the drag coefficient, so the convergence can be watched.
 - Follows particles through the flow with the Maxey-Riley equation (drag, settling, pressure
   gradient and added mass) and finds the collision efficiency from interception, settling and
-  inertia, next to the Sutherland, Weber-Paddock and Yoon-Luttrell correlations.
+  inertia, next to the Sutherland, Weber-Paddock and Yoon-Luttrell correlations. For a mobile
+  surface it also gives Dukhin's generalised Sutherland equation, which includes inertia (Dai et
+  al. 1998), checked against particle paths in potential flow.
 - Renders two synthetic PIV frames of tracers that move with the computed flow and evaluates them
   with FFT cross-correlation, a sub-pixel peak fit, a second pass with window offset and the
   normalised median test. Because the exact flow is known, every PIV vector can be checked, which
@@ -135,6 +137,13 @@ about three minutes.
 | Stokes flow, interception, d<sub>p</sub>/d<sub>b</sub> = 0.05 | 3.6905 × 10<sup>−3</sup> | 3.6905 × 10<sup>−3</sup> |  | Exact for Stokes flow; Gaudin (1957) for small particles |
 | Potential flow, interception, d<sub>p</sub>/d<sub>b</sub> = 0.05 | 0.15012 | 0.15012 |  | Exact for potential flow; Sutherland (1948) for small particles |
 | Stokes flow, settling only (point particle, settling speed 0.1 U) | 0.09091 | 0.09091 |  | Exact: w<sub>s</sub> / (U + w<sub>s</sub>) |
+| **Generalised Sutherland equation, mobile surface** | | | | |
+| Limit of a Stokes number K<sub>3</sub> → 0 (10<sup>−6</sup>), d<sub>p</sub>/d<sub>b</sub> = 0.01: E against Sutherland, 3 d<sub>p</sub>/d<sub>b</sub> | 0.03000 | 0.03000 |  | Dai et al. (1998): the angle of tangency goes to 90° and the GSE to Sutherland (1948) |
+| Same, K<sub>3</sub> = 0.01: written with 2 E<sub>Su</sub> sin²θ<sub>t</sub> in the last term against the form printed by Sajjad and Otsuki (2022), and the angle of tangency | 0.015304, 70.53° | 0.015304, 70.53° |  | The two forms are equal because sin²θ<sub>t</sub> = 2β cos θ<sub>t</sub> |
+| Potential flow, particle with Stokes drag only, d<sub>p</sub>/d<sub>b</sub> = 0.01, K<sub>3</sub> = 0.001: GSE against integrated paths | 0.02726 | 0.02758 |  | Dukhin's model problem, solved here by bisection on the paths; difference +1.17 % |
+| Potential flow, particle with Stokes drag only, d<sub>p</sub>/d<sub>b</sub> = 0.01, K<sub>3</sub> = 0.003: GSE against integrated paths | 0.02306 | 0.02358 |  | Dukhin's model problem, solved here by bisection on the paths; difference +2.25 % |
+| Potential flow, particle with Stokes drag only, d<sub>p</sub>/d<sub>b</sub> = 0.01, K<sub>3</sub> = 0.01: GSE against integrated paths | 0.01530 | 0.01574 |  | Dukhin's model problem, solved here by bisection on the paths; difference +2.87 % |
+| Potential flow, particle with Stokes drag only, d<sub>p</sub>/d<sub>b</sub> = 0.01, K<sub>3</sub> = 0.1: GSE against integrated paths (a large Stokes number, where the two part) | 0.00564 | 0.01430 |  | Dukhin's model problem, solved here by bisection on the paths; difference +153.73 % |
 | **Collision efficiency, immobile surface, interception only** | | | | |
 | E / (d<sub>p</sub>/d<sub>b</sub>)² for small particles, Re = 1 | 1.73 (Yoon and Luttrell: 1.77) | 1.72 | 1.72 | Weber and Paddock (1983) |
 | E / (d<sub>p</sub>/d<sub>b</sub>)² for small particles, Re = 10 | 2.98 (Yoon and Luttrell: 2.90) | 2.93 | 2.93 | Weber and Paddock (1983) |
